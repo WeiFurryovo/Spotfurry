@@ -4,17 +4,27 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LibraryMusic
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.QueueMusic
+import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,6 +52,7 @@ import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.EdgeButton
 import androidx.wear.compose.material3.EdgeButtonSize
+import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.ListHeaderDefaults
 import androidx.wear.compose.material3.ScreenScaffold
@@ -164,18 +176,23 @@ private fun HomeRoute(
                     .clip(androidx.compose.foundation.shape.CircleShape)
                     .background(
                         brush =
-                            Brush.verticalGradient(
+                            Brush.linearGradient(
                                 colors =
                                     listOf(
-                                        Color(0xFF426FB0),
-                                        Color(0xFF6F96CA)
+                                        Color(0xFF4D79BE),
+                                        Color(0xFF7BA4D8)
                                     )
                             )
                     )
-                    .padding(horizontal = 18.dp, vertical = 16.dp)
+                    .border(
+                        width = 1.dp,
+                        color = Color(0x2FFFFFFF),
+                        shape = androidx.compose.foundation.shape.CircleShape
+                    )
+                    .padding(horizontal = 20.dp, vertical = 18.dp)
         ) {
-            CircularMiniButton(
-                label = "库",
+            SmallIconBubble(
+                icon = Icons.Filled.LibraryMusic,
                 onClick = onOpenLibrary,
                 modifier = Modifier.align(Alignment.TopEnd)
             )
@@ -183,9 +200,9 @@ private fun HomeRoute(
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Top
             ) {
-                Spacer(modifier = Modifier.size(4.dp))
+                Spacer(modifier = Modifier.size(10.dp))
 
                 Column(
                     modifier =
@@ -196,69 +213,73 @@ private fun HomeRoute(
                 ) {
                     Text(
                         text = state.currentTrack.title,
-                        fontSize = 18.sp,
+                        fontSize = 19.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        color = Color.White
                     )
                     Text(
                         text = state.currentTrack.artist,
-                        fontSize = 12.sp,
-                        color = Color(0xFFD9E6F8),
+                        fontSize = 14.sp,
+                        color = Color(0xDDE8F0FF),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
                     )
                     Text(
                         text = state.playbackSummary,
-                        fontSize = 10.sp,
-                        color = Color(0xFFEAF2FF),
+                        fontSize = 11.sp,
+                        color = Color(0xFFF2F7FF),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
                     )
                 }
 
+                Spacer(modifier = Modifier.size(24.dp))
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    CircularControlButton(
-                        label = "上",
+                    SecondaryPlayerButton(
+                        icon = Icons.Filled.SkipPrevious,
                         onClick = state::skipPrevious,
-                        size = 48.dp
+                        size = 56.dp
                     )
-                    Spacer(modifier = Modifier.width(18.dp))
-                    CircularControlButton(
-                        label = if (state.isPlaying) "暂停" else "播放",
+                    Spacer(modifier = Modifier.width(22.dp))
+                    PrimaryPlayerButton(
+                        icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         onClick = state::togglePlayPause,
-                        size = 72.dp,
-                        emphasized = true
+                        modifier = Modifier
                     )
-                    Spacer(modifier = Modifier.width(18.dp))
-                    CircularControlButton(
-                        label = "下",
+                    Spacer(modifier = Modifier.width(22.dp))
+                    SecondaryPlayerButton(
+                        icon = Icons.Filled.SkipNext,
                         onClick = state::skipNext,
-                        size = 48.dp
+                        size = 56.dp
                     )
                 }
+
+                Spacer(modifier = Modifier.size(24.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CircularMiniButton(
-                        label = "音+",
+                    SmallIconBubble(
+                        icon = Icons.Filled.VolumeUp,
                         onClick = { state.changeVolume(5) }
                     )
-                    CircularMiniButton(
-                        label = if (state.shuffleEnabled) "随机开" else "随机",
+                    SmallIconBubble(
+                        icon = Icons.Filled.Shuffle,
                         onClick = state::toggleShuffle
                     )
-                    CircularMiniButton(
-                        label = "队列",
+                    SmallIconBubble(
+                        icon = Icons.Filled.QueueMusic,
                         onClick = onOpenQueue
                     )
                 }
@@ -546,40 +567,75 @@ private fun TransformingLazyColumnItemScope.TrackCard(
 }
 
 @Composable
-private fun CircularControlButton(
-    label: String,
+private fun PrimaryPlayerButton(
+    icon: ImageVector,
     onClick: () -> Unit,
-    size: androidx.compose.ui.unit.Dp,
-    emphasized: Boolean = false
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier =
+            modifier
+                .size(90.dp)
+                .clip(androidx.compose.foundation.shape.CircleShape)
+                .background(
+                    brush =
+                        Brush.verticalGradient(
+                            colors =
+                                listOf(
+                                    Color(0xFFF8FBFF),
+                                    Color(0xFFEAF2FE)
+                                )
+                        )
+                )
+                .border(
+                    width = 1.dp,
+                    color = Color(0x4DFFFFFF),
+                    shape = androidx.compose.foundation.shape.CircleShape
+                )
+                .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color(0xFF406FAF),
+            modifier = Modifier.size(38.dp)
+        )
+    }
+}
+
+@Composable
+private fun SecondaryPlayerButton(
+    icon: ImageVector,
+    onClick: () -> Unit,
+    size: androidx.compose.ui.unit.Dp
 ) {
     Box(
         modifier =
             Modifier
                 .size(size)
                 .clip(androidx.compose.foundation.shape.CircleShape)
-                .background(
-                    if (emphasized) {
-                        Color(0xFFF5F8FE)
-                    } else {
-                        Color(0x26FFFFFF)
-                    }
+                .background(Color(0x22FFFFFF))
+                .border(
+                    width = 1.dp,
+                    color = Color(0x14FFFFFF),
+                    shape = androidx.compose.foundation.shape.CircleShape
                 )
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = label,
-            color = if (emphasized) Color(0xFF325D97) else Color.White,
-            fontSize = if (emphasized) 14.sp else 13.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            color = Color.White,
+            modifier = Modifier.size(26.dp)
         )
     }
 }
 
 @Composable
-private fun CircularMiniButton(
-    label: String,
+private fun SmallIconBubble(
+    icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -589,15 +645,19 @@ private fun CircularMiniButton(
                 .size(40.dp)
                 .clip(androidx.compose.foundation.shape.CircleShape)
                 .background(Color(0x22FFFFFF))
+                .border(
+                    width = 1.dp,
+                    color = Color(0x14FFFFFF),
+                    shape = androidx.compose.foundation.shape.CircleShape
+                )
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = label,
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
             color = Color.White,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            modifier = Modifier.size(19.dp)
         )
     }
 }
