@@ -80,11 +80,7 @@ fun SpotfurryApp() {
                                 state = appState,
                                 onOpenNowPlaying = { backStack.add(NowPlayingScreen) },
                                 onOpenLibrary = { backStack.add(LibraryScreen) },
-                                onOpenQueue = { backStack.add(QueueScreen) },
-                                onPlayTrack = { track ->
-                                    appState.playTrack(track)
-                                    backStack.add(NowPlayingScreen)
-                                }
+                                onOpenQueue = { backStack.add(QueueScreen) }
                             )
                         }
                         entry<NowPlayingScreen> {
@@ -132,8 +128,7 @@ private fun HomeRoute(
     state: SpotfurryState,
     onOpenNowPlaying: () -> Unit,
     onOpenLibrary: () -> Unit,
-    onOpenQueue: () -> Unit,
-    onPlayTrack: (Track) -> Unit
+    onOpenQueue: () -> Unit
 ) {
     val listState = rememberTransformingLazyColumnState()
     val transformationSpec = rememberTransformationSpec()
@@ -145,7 +140,7 @@ private fun HomeRoute(
                 onClick = onOpenNowPlaying,
                 buttonSize = EdgeButtonSize.ExtraSmall
             ) {
-                Text(if (state.isPlaying) "正在播放" else "继续播放")
+                Text("详情")
             }
         }
     ) { contentPadding ->
@@ -164,14 +159,54 @@ private fun HomeRoute(
                             ),
                     transformation = surfaceTransformation(transformationSpec)
                 ) {
-                    Text("Spotfurry")
+                    Text("播放控制")
                 }
             }
             item {
                 TrackCard(
                     title = state.currentTrack.title,
-                    body = "${state.currentTrack.artist}  ${state.playbackSummary}",
+                    body = "${state.currentTrack.artist}\n${state.playbackSummary}",
                     onClick = onOpenNowPlaying,
+                    transformationSpec = transformationSpec
+                )
+            }
+            item {
+                ActionRowButton(
+                    label = if (state.isPlaying) "暂停播放" else "开始播放",
+                    detail = "点击切换当前歌曲状态",
+                    onClick = state::togglePlayPause,
+                    transformationSpec = transformationSpec
+                )
+            }
+            item {
+                ActionRowButton(
+                    label = "下一首",
+                    detail = state.nextTrackLabel,
+                    onClick = state::skipNext,
+                    transformationSpec = transformationSpec
+                )
+            }
+            item {
+                ActionRowButton(
+                    label = "上一首",
+                    detail = "重新播放当前歌曲或返回上一首",
+                    onClick = state::skipPrevious,
+                    transformationSpec = transformationSpec
+                )
+            }
+            item {
+                ActionRowButton(
+                    label = if (state.isLiked) "取消喜欢" else "喜欢歌曲",
+                    detail = "当前重复：${state.repeatMode.label}",
+                    onClick = state::toggleLike,
+                    transformationSpec = transformationSpec
+                )
+            }
+            item {
+                ActionRowButton(
+                    label = "播放队列",
+                    detail = "队列中共有 ${state.queue.size} 首歌",
+                    onClick = onOpenQueue,
                     transformationSpec = transformationSpec
                 )
             }
@@ -182,30 +217,6 @@ private fun HomeRoute(
                     onClick = onOpenLibrary,
                     transformationSpec = transformationSpec
                 )
-            }
-            item {
-                ActionRowButton(
-                    label = "播放队列",
-                    detail = "当前队列共 ${state.queue.size} 首歌",
-                    onClick = onOpenQueue,
-                    transformationSpec = transformationSpec
-                )
-            }
-            item {
-                SectionHeader(
-                    label = "发现",
-                    transformationSpec = transformationSpec
-                )
-            }
-            state.discoverTracks.forEach { track ->
-                item {
-                    TrackCard(
-                        title = track.title,
-                        body = "${track.artist}  ${track.durationLabel}",
-                        onClick = { onPlayTrack(track) },
-                        transformationSpec = transformationSpec
-                    )
-                }
             }
         }
     }
@@ -450,22 +461,6 @@ private fun QueueRoute(
 }
 
 @Composable
-private fun TransformingLazyColumnItemScope.SectionHeader(
-    label: String,
-    transformationSpec: androidx.wear.compose.material3.lazy.TransformationSpec
-) {
-    ListHeader(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .transformedHeight(this, transformationSpec),
-        transformation = surfaceTransformation(transformationSpec)
-    ) {
-        Text(label)
-    }
-}
-
-@Composable
 private fun TransformingLazyColumnItemScope.ActionRowButton(
     label: String,
     detail: String,
@@ -559,12 +554,6 @@ private class SpotfurryState private constructor(
 
     val currentTrack: Track
         get() = queue.firstOrNull { it.id == currentTrackId } ?: queue.first()
-
-    val discoverTracks: List<Track> =
-        playlists
-            .flatMap { playlist -> playlist.tracks }
-            .distinctBy { track -> track.id }
-            .take(5)
 
     val playbackSummary: String
         get() {
