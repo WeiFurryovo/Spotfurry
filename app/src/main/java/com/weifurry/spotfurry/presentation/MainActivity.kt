@@ -145,7 +145,7 @@ private fun HomeRoute(
                 onClick = onOpenNowPlaying,
                 buttonSize = EdgeButtonSize.ExtraSmall
             ) {
-                Text(if (state.isPlaying) "Playing" else "Resume")
+                Text(if (state.isPlaying) "正在播放" else "继续播放")
             }
         }
     ) { contentPadding ->
@@ -177,23 +177,23 @@ private fun HomeRoute(
             }
             item {
                 ActionRowButton(
-                    label = "Library",
-                    detail = "${state.playlists.size} mixes ready",
+                    label = "音乐库",
+                    detail = "已准备 ${state.playlists.size} 个歌单",
                     onClick = onOpenLibrary,
                     transformationSpec = transformationSpec
                 )
             }
             item {
                 ActionRowButton(
-                    label = "Queue",
-                    detail = "${state.queue.size} tracks in rotation",
+                    label = "播放队列",
+                    detail = "当前队列共 ${state.queue.size} 首歌",
                     onClick = onOpenQueue,
                     transformationSpec = transformationSpec
                 )
             }
             item {
                 SectionHeader(
-                    label = "Discover",
+                    label = "发现",
                     transformationSpec = transformationSpec
                 )
             }
@@ -227,7 +227,7 @@ private fun NowPlayingRoute(
                 onClick = state::togglePlayPause,
                 buttonSize = EdgeButtonSize.ExtraSmall
             ) {
-                Text(if (state.isPlaying) "Pause" else "Play")
+                Text(if (state.isPlaying) "暂停" else "播放")
             }
         }
     ) { contentPadding ->
@@ -246,7 +246,7 @@ private fun NowPlayingRoute(
                             ),
                     transformation = surfaceTransformation(transformationSpec)
                 ) {
-                    Text("Now Playing")
+                    Text("当前播放")
                 }
             }
             item {
@@ -259,7 +259,7 @@ private fun NowPlayingRoute(
             }
             item {
                 ActionRowButton(
-                    label = "Next Track",
+                    label = "下一首",
                     detail = state.nextTrackLabel,
                     onClick = state::skipNext,
                     transformationSpec = transformationSpec
@@ -267,64 +267,64 @@ private fun NowPlayingRoute(
             }
             item {
                 ActionRowButton(
-                    label = "Previous Track",
-                    detail = "Restart or jump back in the queue",
+                    label = "上一首",
+                    detail = "重新播放当前歌曲或返回上一首",
                     onClick = state::skipPrevious,
                     transformationSpec = transformationSpec
                 )
             }
             item {
                 ActionRowButton(
-                    label = if (state.isLiked) "Liked" else "Like Track",
-                    detail = "Save this song to your watch favorites",
+                    label = if (state.isLiked) "已喜欢" else "喜欢歌曲",
+                    detail = "把这首歌加入手表收藏",
                     onClick = state::toggleLike,
                     transformationSpec = transformationSpec
                 )
             }
             item {
                 ActionRowButton(
-                    label = if (state.shuffleEnabled) "Shuffle On" else "Shuffle Off",
-                    detail = "Mode: ${state.repeatMode.label}",
+                    label = if (state.shuffleEnabled) "随机已开" else "随机已关",
+                    detail = "模式：${state.repeatMode.label}",
                     onClick = state::toggleShuffle,
                     transformationSpec = transformationSpec
                 )
             }
             item {
                 ActionRowButton(
-                    label = "Repeat",
-                    detail = "Current mode: ${state.repeatMode.label}",
+                    label = "重复播放",
+                    detail = "当前模式：${state.repeatMode.label}",
                     onClick = state::cycleRepeat,
                     transformationSpec = transformationSpec
                 )
             }
             item {
                 ActionRowButton(
-                    label = "Volume +5",
-                    detail = "Current volume ${state.volumePercent}%",
+                    label = "音量 +5",
+                    detail = "当前音量 ${state.volumePercent}%",
                     onClick = { state.changeVolume(5) },
                     transformationSpec = transformationSpec
                 )
             }
             item {
                 ActionRowButton(
-                    label = "Volume -5",
-                    detail = "Current volume ${state.volumePercent}%",
+                    label = "音量 -5",
+                    detail = "当前音量 ${state.volumePercent}%",
                     onClick = { state.changeVolume(-5) },
                     transformationSpec = transformationSpec
                 )
             }
             item {
                 ActionRowButton(
-                    label = "Open Queue",
-                    detail = "${state.queue.size} tracks lined up",
+                    label = "打开队列",
+                    detail = "队列中共有 ${state.queue.size} 首歌",
                     onClick = onOpenQueue,
                     transformationSpec = transformationSpec
                 )
             }
             item {
                 ActionRowButton(
-                    label = "Browse Library",
-                    detail = "Swap the current queue to a new mix",
+                    label = "浏览音乐库",
+                    detail = "切换到新的播放列表",
                     onClick = onOpenLibrary,
                     transformationSpec = transformationSpec
                 )
@@ -349,7 +349,7 @@ private fun LibraryRoute(
                 onClick = onOpenNowPlaying,
                 buttonSize = EdgeButtonSize.ExtraSmall
             ) {
-                Text("Player")
+                Text("播放器")
             }
         }
     ) { contentPadding ->
@@ -368,13 +368,13 @@ private fun LibraryRoute(
                             ),
                     transformation = surfaceTransformation(transformationSpec)
                 ) {
-                    Text("Library")
+                    Text("音乐库")
                 }
             }
             item {
                 TrackCard(
-                    title = "Pinned Mixes",
-                    body = "${state.playlists.size} ready-made queues for a watch session",
+                    title = "固定歌单",
+                    body = "已准备 ${state.playlists.size} 个适合手表场景的歌单",
                     onClick = {},
                     transformationSpec = transformationSpec
                 )
@@ -383,7 +383,7 @@ private fun LibraryRoute(
                 item {
                     TrackCard(
                         title = playlist.name,
-                        body = "${playlist.subtitle}\n${playlist.tracks.size} tracks",
+                        body = "${playlist.subtitle}\n共 ${playlist.tracks.size} 首歌",
                         onClick = { onQueueLoaded(playlist) },
                         transformationSpec = transformationSpec
                     )
@@ -408,7 +408,7 @@ private fun QueueRoute(
                 onClick = state::skipNext,
                 buttonSize = EdgeButtonSize.ExtraSmall
             ) {
-                Text("Skip")
+                Text("跳过")
             }
         }
     ) { contentPadding ->
@@ -427,7 +427,7 @@ private fun QueueRoute(
                             ),
                     transformation = surfaceTransformation(transformationSpec)
                 ) {
-                    Text("Queue")
+                    Text("播放队列")
                 }
             }
             state.queue.forEach { track ->
@@ -436,7 +436,7 @@ private fun QueueRoute(
                         title = track.title,
                         body =
                             if (track.id == state.currentTrack.id) {
-                                "${track.artist}  ${track.durationLabel}\nPlaying now"
+                                "${track.artist}  ${track.durationLabel}\n正在播放"
                             } else {
                                 "${track.artist}  ${track.durationLabel}"
                             },
@@ -523,9 +523,9 @@ data class Playlist(
 )
 
 enum class RepeatMode(val label: String) {
-    Off("Off"),
-    Queue("Queue"),
-    Track("Track")
+    Off("关闭"),
+    Queue("列表循环"),
+    Track("单曲循环")
 }
 
 private class SpotfurryState private constructor(
@@ -569,14 +569,14 @@ private class SpotfurryState private constructor(
     val playbackSummary: String
         get() {
             val elapsed = (currentTrack.durationSeconds * progress).toInt()
-            val stateLabel = if (isPlaying) "Playing" else "Paused"
+            val stateLabel = if (isPlaying) "正在播放" else "已暂停"
             return "$stateLabel  ${formatClock(elapsed)} / ${currentTrack.durationLabel}"
         }
 
     val nextTrackLabel: String
         get() {
             if (queue.size < 2) {
-                return "No alternate track in the current queue"
+                return "当前队列中没有其他歌曲"
             }
 
             val nextIndex =
@@ -688,38 +688,38 @@ private class SpotfurryState private constructor(
                 listOf(
                     Playlist(
                         id = "night-drive",
-                        name = "Night Drive",
-                        subtitle = "Warm synths for a quick city ride",
+                        name = "夜行驾驶",
+                        subtitle = "适合夜晚通勤的温暖合成器旋律",
                         tracks =
                             listOf(
-                                Track("t1", "Afterglow Circuit", "Nova Pulse", 214),
-                                Track("t2", "Moonlit Exit", "Velvet Signal", 201),
-                                Track("t3", "Static Hearts", "Aster Lane", 226),
-                                Track("t4", "Glass Highway", "Sora Echo", 192)
+                                Track("t1", "余晖电路", "新星脉冲", 214),
+                                Track("t2", "月光出口", "丝绒信号", 201),
+                                Track("t3", "静电心跳", "紫苑小径", 226),
+                                Track("t4", "玻璃公路", "天穹回声", 192)
                             )
                     ),
                     Playlist(
                         id = "focus-loop",
-                        name = "Focus Loop",
-                        subtitle = "A calm queue for short wrist sessions",
+                        name = "专注循环",
+                        subtitle = "适合短时专注的平静播放队列",
                         tracks =
                             listOf(
-                                Track("t5", "Soft Orbit", "Cinder Vale", 178),
-                                Track("t6", "Quiet Binary", "North Current", 242),
-                                Track("t7", "Luma Script", "Halo Drift", 206),
-                                Track("t8", "Clean Room", "Aerial Bloom", 187)
+                                Track("t5", "柔和轨道", "灰烬山谷", 178),
+                                Track("t6", "静默二进制", "北方气流", 242),
+                                Track("t7", "流明脚本", "光环漂流", 206),
+                                Track("t8", "洁净房间", "高空绽放", 187)
                             )
                     ),
                     Playlist(
                         id = "run-mode",
-                        name = "Run Mode",
-                        subtitle = "Fast hooks with enough punch for movement",
+                        name = "跑步模式",
+                        subtitle = "适合运动节奏的高能旋律",
                         tracks =
                             listOf(
-                                Track("t9", "Sparkline", "Kite Atlas", 181),
-                                Track("t10", "Velocity Bloom", "June Arcade", 195),
-                                Track("t11", "Pulse Parallel", "Echo Harbor", 204),
-                                Track("t12", "Neon Sprint", "Rivet Youth", 176)
+                                Track("t9", "火花轨迹", "风筝星图", 181),
+                                Track("t10", "速度绽放", "六月街机", 195),
+                                Track("t11", "脉冲并行", "回声港湾", 204),
+                                Track("t12", "霓虹冲刺", "铆钉青春", 176)
                             )
                     )
                 )
