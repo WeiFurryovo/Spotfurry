@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Pause
@@ -52,7 +53,6 @@ import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.EdgeButton
 import androidx.wear.compose.material3.EdgeButtonSize
-import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.ListHeaderDefaults
 import androidx.wear.compose.material3.ScreenScaffold
@@ -627,7 +627,7 @@ private fun SecondaryPlayerButton(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            color = Color.White,
+            tint = Color.White,
             modifier = Modifier.size(26.dp)
         )
     }
@@ -656,7 +656,7 @@ private fun SmallIconBubble(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            color = Color.White,
+            tint = Color.White,
             modifier = Modifier.size(19.dp)
         )
     }
