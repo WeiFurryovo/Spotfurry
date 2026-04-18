@@ -3,14 +3,34 @@ package com.weifurry.spotfurry.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -130,93 +150,118 @@ private fun HomeRoute(
     onOpenLibrary: () -> Unit,
     onOpenQueue: () -> Unit
 ) {
-    val listState = rememberTransformingLazyColumnState()
-    val transformationSpec = rememberTransformationSpec()
-
-    ScreenScaffold(
-        scrollState = listState,
-        edgeButton = {
-            EdgeButton(
-                onClick = onOpenNowPlaying,
-                buttonSize = EdgeButtonSize.ExtraSmall
-            ) {
-                Text("详情")
-            }
-        }
-    ) { contentPadding ->
-        TransformingLazyColumn(
-            state = listState,
-            contentPadding = contentPadding
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(
+                        brush =
+                            Brush.verticalGradient(
+                                colors =
+                                    listOf(
+                                        Color(0xFF426FB0),
+                                        Color(0xFF6F96CA)
+                                    )
+                            )
+                    )
+                    .padding(horizontal = 18.dp, vertical = 16.dp)
         ) {
-            item {
-                ListHeader(
+            CircularMiniButton(
+                label = "库",
+                onClick = onOpenLibrary,
+                modifier = Modifier.align(Alignment.TopEnd)
+            )
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Spacer(modifier = Modifier.size(4.dp))
+
+                Column(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .transformedHeight(this, transformationSpec)
-                            .minimumVerticalContentPadding(
-                                ListHeaderDefaults.minimumTopListContentPadding
-                            ),
-                    transformation = surfaceTransformation(transformationSpec)
+                            .clickable(onClick = onOpenNowPlaying),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("播放控制")
+                    Text(
+                        text = state.currentTrack.title,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = state.currentTrack.artist,
+                        fontSize = 12.sp,
+                        color = Color(0xFFD9E6F8),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = state.playbackSummary,
+                        fontSize = 10.sp,
+                        color = Color(0xFFEAF2FF),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
                 }
-            }
-            item {
-                TrackCard(
-                    title = state.currentTrack.title,
-                    body = "${state.currentTrack.artist}\n${state.playbackSummary}",
-                    onClick = onOpenNowPlaying,
-                    transformationSpec = transformationSpec
-                )
-            }
-            item {
-                ActionRowButton(
-                    label = if (state.isPlaying) "暂停播放" else "开始播放",
-                    detail = "点击切换当前歌曲状态",
-                    onClick = state::togglePlayPause,
-                    transformationSpec = transformationSpec
-                )
-            }
-            item {
-                ActionRowButton(
-                    label = "下一首",
-                    detail = state.nextTrackLabel,
-                    onClick = state::skipNext,
-                    transformationSpec = transformationSpec
-                )
-            }
-            item {
-                ActionRowButton(
-                    label = "上一首",
-                    detail = "重新播放当前歌曲或返回上一首",
-                    onClick = state::skipPrevious,
-                    transformationSpec = transformationSpec
-                )
-            }
-            item {
-                ActionRowButton(
-                    label = if (state.isLiked) "取消喜欢" else "喜欢歌曲",
-                    detail = "当前重复：${state.repeatMode.label}",
-                    onClick = state::toggleLike,
-                    transformationSpec = transformationSpec
-                )
-            }
-            item {
-                ActionRowButton(
-                    label = "播放队列",
-                    detail = "队列中共有 ${state.queue.size} 首歌",
-                    onClick = onOpenQueue,
-                    transformationSpec = transformationSpec
-                )
-            }
-            item {
-                ActionRowButton(
-                    label = "音乐库",
-                    detail = "已准备 ${state.playlists.size} 个歌单",
-                    onClick = onOpenLibrary,
-                    transformationSpec = transformationSpec
-                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularControlButton(
+                        label = "上",
+                        onClick = state::skipPrevious,
+                        size = 48.dp
+                    )
+                    Spacer(modifier = Modifier.width(18.dp))
+                    CircularControlButton(
+                        label = if (state.isPlaying) "暂停" else "播放",
+                        onClick = state::togglePlayPause,
+                        size = 72.dp,
+                        emphasized = true
+                    )
+                    Spacer(modifier = Modifier.width(18.dp))
+                    CircularControlButton(
+                        label = "下",
+                        onClick = state::skipNext,
+                        size = 48.dp
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularMiniButton(
+                        label = "音+",
+                        onClick = { state.changeVolume(5) }
+                    )
+                    CircularMiniButton(
+                        label = if (state.shuffleEnabled) "随机开" else "随机",
+                        onClick = state::toggleShuffle
+                    )
+                    CircularMiniButton(
+                        label = "队列",
+                        onClick = onOpenQueue
+                    )
+                }
             }
         }
     }
@@ -497,6 +542,63 @@ private fun TransformingLazyColumnItemScope.TrackCard(
         transformation = surfaceTransformation(transformationSpec)
     ) {
         Text(body)
+    }
+}
+
+@Composable
+private fun CircularControlButton(
+    label: String,
+    onClick: () -> Unit,
+    size: androidx.compose.ui.unit.Dp,
+    emphasized: Boolean = false
+) {
+    Box(
+        modifier =
+            Modifier
+                .size(size)
+                .clip(androidx.compose.foundation.shape.CircleShape)
+                .background(
+                    if (emphasized) {
+                        Color(0xFFF5F8FE)
+                    } else {
+                        Color(0x26FFFFFF)
+                    }
+                )
+                .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            color = if (emphasized) Color(0xFF325D97) else Color.White,
+            fontSize = if (emphasized) 14.sp else 13.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun CircularMiniButton(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier =
+            modifier
+                .size(40.dp)
+                .clip(androidx.compose.foundation.shape.CircleShape)
+                .background(Color(0x22FFFFFF))
+                .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            color = Color.White,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
