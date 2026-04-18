@@ -16,6 +16,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
+import androidx.wear.compose.foundation.lazy.TransformingLazyColumnItemScope
 import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.EdgeButton
@@ -23,7 +24,7 @@ import androidx.wear.compose.material3.EdgeButtonSize
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.ListHeaderDefaults
 import androidx.wear.compose.material3.ScreenScaffold
-import androidx.wear.compose.material3.SurfaceTransformation
+import androidx.wear.compose.material3.SurfaceTransformation as surfaceTransformation
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.TitleCard
 import androidx.wear.compose.material3.lazy.rememberTransformationSpec
@@ -161,7 +162,7 @@ private fun HomeRoute(
                             .minimumVerticalContentPadding(
                                 ListHeaderDefaults.minimumTopListContentPadding
                             ),
-                    transformation = SurfaceTransformation(transformationSpec)
+                    transformation = surfaceTransformation(transformationSpec)
                 ) {
                     Text("Spotfurry")
                 }
@@ -243,7 +244,7 @@ private fun NowPlayingRoute(
                             .minimumVerticalContentPadding(
                                 ListHeaderDefaults.minimumTopListContentPadding
                             ),
-                    transformation = SurfaceTransformation(transformationSpec)
+                    transformation = surfaceTransformation(transformationSpec)
                 ) {
                     Text("Now Playing")
                 }
@@ -365,7 +366,7 @@ private fun LibraryRoute(
                             .minimumVerticalContentPadding(
                                 ListHeaderDefaults.minimumTopListContentPadding
                             ),
-                    transformation = SurfaceTransformation(transformationSpec)
+                    transformation = surfaceTransformation(transformationSpec)
                 ) {
                     Text("Library")
                 }
@@ -424,7 +425,7 @@ private fun QueueRoute(
                             .minimumVerticalContentPadding(
                                 ListHeaderDefaults.minimumTopListContentPadding
                             ),
-                    transformation = SurfaceTransformation(transformationSpec)
+                    transformation = surfaceTransformation(transformationSpec)
                 ) {
                     Text("Queue")
                 }
@@ -449,22 +450,23 @@ private fun QueueRoute(
 }
 
 @Composable
-private fun SectionHeader(
+private fun TransformingLazyColumnItemScope.SectionHeader(
     label: String,
     transformationSpec: androidx.wear.compose.material3.lazy.TransformationSpec
 ) {
     ListHeader(
         modifier =
             Modifier
-                .fillMaxWidth(),
-        transformation = SurfaceTransformation(transformationSpec)
+                .fillMaxWidth()
+                .transformedHeight(this, transformationSpec),
+        transformation = surfaceTransformation(transformationSpec)
     ) {
         Text(label)
     }
 }
 
 @Composable
-private fun ActionRowButton(
+private fun TransformingLazyColumnItemScope.ActionRowButton(
     label: String,
     detail: String,
     onClick: () -> Unit,
@@ -473,15 +475,18 @@ private fun ActionRowButton(
     TitleCard(
         title = { Text(label) },
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        transformation = SurfaceTransformation(transformationSpec)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .transformedHeight(this, transformationSpec),
+        transformation = surfaceTransformation(transformationSpec)
     ) {
         Text(detail)
     }
 }
 
 @Composable
-private fun TrackCard(
+private fun TransformingLazyColumnItemScope.TrackCard(
     title: String,
     body: String,
     onClick: () -> Unit,
@@ -490,8 +495,11 @@ private fun TrackCard(
     TitleCard(
         title = { Text(title) },
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        transformation = SurfaceTransformation(transformationSpec)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .transformedHeight(this, transformationSpec),
+        transformation = surfaceTransformation(transformationSpec)
     ) {
         Text(body)
     }
