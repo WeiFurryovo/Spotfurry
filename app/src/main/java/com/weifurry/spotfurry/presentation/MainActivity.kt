@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -256,31 +257,25 @@ private fun HomeRoute(
                         Modifier
                             .align(Alignment.Center)
                             .fillMaxWidth()
-                            .padding(top = 10.dp),
+                            .offset(y = 20.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipPrevious,
                         onClick = state::skipPrevious,
                         size = 44.dp,
-                        modifier =
-                            Modifier
-                                .align(Alignment.CenterStart)
-                                .padding(top = 8.dp)
+                        modifier = Modifier.align(Alignment.CenterStart)
                     )
                     PrimaryPlayerButton(
                         icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         onClick = state::togglePlayPause,
-                        size = 82.dp
+                        size = 78.dp
                     )
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipNext,
                         onClick = state::skipNext,
                         size = 44.dp,
-                        modifier =
-                            Modifier
-                                .align(Alignment.CenterEnd)
-                                .padding(top = 8.dp)
+                        modifier = Modifier.align(Alignment.CenterEnd)
                     )
                 }
 
