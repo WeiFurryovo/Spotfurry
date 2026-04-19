@@ -8,12 +8,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -170,7 +169,7 @@ private fun HomeRoute(
                 .padding(6.dp),
         contentAlignment = Alignment.Center
     ) {
-        Box(
+        BoxWithConstraints(
             modifier =
                 Modifier
                     .fillMaxSize()
@@ -190,31 +189,36 @@ private fun HomeRoute(
                         color = Color(0x2FFFFFFF),
                         shape = androidx.compose.foundation.shape.CircleShape
                     )
-                    .padding(horizontal = 12.dp, vertical = 12.dp)
         ) {
-            SmallIconBubble(
-                icon = Icons.Filled.LibraryMusic,
-                onClick = onOpenLibrary,
-                size = 38.dp,
-                iconSize = 18.dp,
-                modifier =
-                    Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 6.dp, end = 6.dp)
-            )
+            val safeHorizontal = maxWidth * 0.15f
+            val safeTop = maxHeight * 0.14f
+            val safeBottom = maxHeight * 0.12f
 
-            Column(
+            Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .padding(top = 40.dp, bottom = 18.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
+                        .padding(
+                            start = safeHorizontal,
+                            end = safeHorizontal,
+                            top = safeTop,
+                            bottom = safeBottom
+                        )
             ) {
+                SmallIconBubble(
+                    icon = Icons.Filled.LibraryMusic,
+                    onClick = onOpenLibrary,
+                    size = 34.dp,
+                    iconSize = 16.dp,
+                    modifier = Modifier.align(Alignment.TopEnd)
+                )
+
                 Column(
                     modifier =
                         Modifier
-                            .fillMaxWidth(0.7f)
+                            .align(Alignment.TopCenter)
+                            .fillMaxWidth()
+                            .padding(horizontal = 6.dp)
                             .clickable(onClick = onOpenNowPlaying),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -245,65 +249,66 @@ private fun HomeRoute(
                     )
                 }
 
-                Spacer(modifier = Modifier.size(20.dp))
-
                 Box(
                     modifier =
                         Modifier
+                            .align(Alignment.Center)
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
+                            .padding(top = 18.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipPrevious,
                         onClick = state::skipPrevious,
-                        size = 50.dp,
+                        size = 46.dp,
                         modifier =
                             Modifier
                                 .align(Alignment.CenterStart)
-                                .offset(x = 10.dp, y = 14.dp)
+                                .padding(top = 10.dp)
                     )
                     PrimaryPlayerButton(
                         icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         onClick = state::togglePlayPause,
-                        size = 80.dp
+                        size = 76.dp
                     )
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipNext,
                         onClick = state::skipNext,
-                        size = 50.dp,
+                        size = 46.dp,
                         modifier =
                             Modifier
                                 .align(Alignment.CenterEnd)
-                                .offset(x = (-10).dp, y = 14.dp)
+                                .padding(top = 10.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.size(18.dp))
-
                 Row(
-                    modifier = Modifier.fillMaxWidth(0.72f),
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(horizontal = 6.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.VolumeUp,
                         onClick = { state.changeVolume(5) },
-                        size = 36.dp,
-                        iconSize = 18.dp
+                        size = 34.dp,
+                        iconSize = 17.dp
                     )
                     SmallIconBubble(
                         icon = Icons.Filled.Shuffle,
                         onClick = state::toggleShuffle,
-                        size = 36.dp,
-                        iconSize = 18.dp,
+                        size = 34.dp,
+                        iconSize = 17.dp,
                         highlighted = state.shuffleEnabled
                     )
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.QueueMusic,
                         onClick = onOpenQueue,
-                        size = 36.dp,
-                        iconSize = 18.dp
+                        size = 34.dp,
+                        iconSize = 17.dp
                     )
                 }
             }
