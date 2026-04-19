@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -175,24 +174,10 @@ private fun HomeRoute(
                 Modifier
                     .fillMaxSize()
                     .clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(
-                        brush =
-                            Brush.linearGradient(
-                                colors =
-                                    listOf(
-                                        Color(0xFF4D79BE),
-                                        Color(0xFF7BA4D8)
-                                    )
-                            )
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = Color(0x2FFFFFFF),
-                        shape = androidx.compose.foundation.shape.CircleShape
-                    )
+                    .background(Color(0xFF050505))
         ) {
-            val safeHorizontal = maxWidth * 0.16f
-            val safeTop = maxHeight * 0.15f
+            val safeHorizontal = maxWidth * 0.18f
+            val safeTop = maxHeight * 0.16f
             val safeBottom = maxHeight * 0.16f
 
             Box(
@@ -209,33 +194,35 @@ private fun HomeRoute(
                 SmallIconBubble(
                     icon = Icons.Filled.LibraryMusic,
                     onClick = onOpenLibrary,
-                    size = 28.dp,
-                    iconSize = 13.dp,
-                    modifier = Modifier.align(Alignment.TopEnd)
+                    size = 30.dp,
+                    iconSize = 14.dp,
+                    modifier = Modifier.align(Alignment.TopEnd),
+                    bubbleColor = Color(0xFF232323),
+                    borderColor = Color(0xFF2E2E2E)
                 )
 
                 Column(
                     modifier =
                         Modifier
                             .align(Alignment.TopCenter)
-                            .fillMaxWidth(0.78f)
+                            .fillMaxWidth(0.82f)
                             .clickable(onClick = onOpenNowPlaying),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = state.currentTrack.title,
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,
-                        color = Color.White
+                        color = Color(0xFFF4F4F4)
                     )
                     Text(
                         text = state.currentTrack.artist,
                         modifier = Modifier.padding(top = 2.dp),
-                        fontSize = 13.sp,
-                        color = Color(0xDDE8F0FF),
+                        fontSize = 12.sp,
+                        color = Color(0xFFB6B6B6),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
@@ -244,7 +231,7 @@ private fun HomeRoute(
                         text = state.playbackSummary,
                         modifier = Modifier.padding(top = 4.dp),
                         fontSize = 10.sp,
-                        color = Color(0xDFF2F7FF),
+                        color = Color(0xFF9D9D9D),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
@@ -256,31 +243,25 @@ private fun HomeRoute(
                         Modifier
                             .align(Alignment.Center)
                             .fillMaxWidth()
-                            .offset(y = 18.dp),
+                            .offset(y = 12.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipPrevious,
                         onClick = state::skipPrevious,
-                        size = 44.dp,
-                        modifier =
-                            Modifier
-                                .align(Alignment.CenterStart)
-                                .offset(y = 2.dp)
+                        size = 50.dp,
+                        modifier = Modifier.align(Alignment.CenterStart)
                     )
                     PrimaryPlayerButton(
                         icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         onClick = state::togglePlayPause,
-                        size = 78.dp
+                        size = 84.dp
                     )
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipNext,
                         onClick = state::skipNext,
-                        size = 44.dp,
-                        modifier =
-                            Modifier
-                                .align(Alignment.CenterEnd)
-                                .offset(y = 2.dp)
+                        size = 50.dp,
+                        modifier = Modifier.align(Alignment.CenterEnd)
                     )
                 }
 
@@ -288,28 +269,34 @@ private fun HomeRoute(
                     modifier =
                         Modifier
                             .align(Alignment.BottomCenter)
-                            .fillMaxWidth(0.72f),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                            .fillMaxWidth(0.88f),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.VolumeUp,
                         onClick = { state.changeVolume(5) },
-                        size = 30.dp,
-                        iconSize = 14.dp
+                        size = 36.dp,
+                        iconSize = 18.dp,
+                        bubbleColor = Color(0xFF232323),
+                        borderColor = Color(0xFF2E2E2E)
                     )
                     SmallIconBubble(
                         icon = Icons.Filled.Shuffle,
                         onClick = state::toggleShuffle,
-                        size = 30.dp,
-                        iconSize = 14.dp,
-                        highlighted = state.shuffleEnabled
+                        size = 36.dp,
+                        iconSize = 18.dp,
+                        highlighted = state.shuffleEnabled,
+                        bubbleColor = Color(0xFF232323),
+                        borderColor = Color(0xFF2E2E2E)
                     )
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.QueueMusic,
                         onClick = onOpenQueue,
-                        size = 30.dp,
-                        iconSize = 14.dp
+                        size = 36.dp,
+                        iconSize = 18.dp,
+                        bubbleColor = Color(0xFF232323),
+                        borderColor = Color(0xFF2E2E2E)
                     )
                 }
             }
@@ -607,19 +594,10 @@ private fun PrimaryPlayerButton(
             modifier
                 .size(size)
                 .clip(androidx.compose.foundation.shape.CircleShape)
-                .background(
-                    brush =
-                        Brush.verticalGradient(
-                            colors =
-                                listOf(
-                                    Color(0xFFF8FBFF),
-                                    Color(0xFFEAF2FE)
-                                )
-                        )
-                )
+                .background(Color(0xFF2A2A2A))
                 .border(
                     width = 1.dp,
-                    color = Color(0x4DFFFFFF),
+                    color = Color(0xFF343434),
                     shape = androidx.compose.foundation.shape.CircleShape
                 )
                 .clickable(onClick = onClick),
@@ -628,7 +606,7 @@ private fun PrimaryPlayerButton(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Color(0xFF406FAF),
+            tint = Color(0xFFD5D5D5),
             modifier = Modifier.size(size * 0.42f)
         )
     }
@@ -646,10 +624,10 @@ private fun SecondaryPlayerButton(
             modifier
                 .size(size)
                 .clip(androidx.compose.foundation.shape.CircleShape)
-                .background(Color(0x1EFFFFFF))
+                .background(Color(0xFF212121))
                 .border(
                     width = 1.dp,
-                    color = Color(0x12FFFFFF),
+                    color = Color(0xFF2D2D2D),
                     shape = androidx.compose.foundation.shape.CircleShape
                 )
                 .clickable(onClick = onClick),
@@ -658,7 +636,7 @@ private fun SecondaryPlayerButton(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Color.White,
+            tint = Color(0xFFE5E5E5),
             modifier = Modifier.size(size * 0.46f)
         )
     }
@@ -671,7 +649,9 @@ private fun SmallIconBubble(
     modifier: Modifier = Modifier,
     size: Dp = 40.dp,
     iconSize: Dp = 19.dp,
-    highlighted: Boolean = false
+    highlighted: Boolean = false,
+    bubbleColor: Color = Color(0xFF212121),
+    borderColor: Color = Color(0xFF2D2D2D)
 ) {
     Box(
         modifier =
@@ -680,14 +660,14 @@ private fun SmallIconBubble(
                 .clip(androidx.compose.foundation.shape.CircleShape)
                 .background(
                     if (highlighted) {
-                        Color(0x32FFFFFF)
+                        Color(0xFF343434)
                     } else {
-                        Color(0x1EFFFFFF)
+                        bubbleColor
                     }
                 )
                 .border(
                     width = 1.dp,
-                    color = Color(0x12FFFFFF),
+                    color = borderColor,
                     shape = androidx.compose.foundation.shape.CircleShape
                 )
                 .clickable(onClick = onClick),
@@ -696,7 +676,7 @@ private fun SmallIconBubble(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Color.White,
+            tint = Color(0xFFE5E5E5),
             modifier = Modifier.size(iconSize)
         )
     }
