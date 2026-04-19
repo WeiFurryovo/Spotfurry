@@ -177,8 +177,11 @@ private fun HomeRoute(
                     .background(Color(0xFF050505))
         ) {
             val safeHorizontal = maxWidth * 0.18f
-            val safeTop = maxHeight * 0.15f
-            val safeBottom = maxHeight * 0.15f
+            val safeTop = maxHeight * 0.14f
+            val safeBottom = maxHeight * 0.14f
+            val controlCenterY = maxHeight * 0.08f
+            val sideOffset = maxWidth * 0.24f
+            val utilityOffsetY = maxHeight * 0.31f
 
             Box(
                 modifier =
@@ -206,7 +209,7 @@ private fun HomeRoute(
                     modifier =
                         Modifier
                             .align(Alignment.TopCenter)
-                            .fillMaxWidth(0.88f)
+                            .fillMaxWidth(0.84f)
                             .clickable(onClick = onOpenNowPlaying),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -248,38 +251,42 @@ private fun HomeRoute(
                     )
                 }
 
-                Box(
+                PrimaryPlayerButton(
+                    icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    onClick = state::togglePlayPause,
                     modifier =
                         Modifier
                             .align(Alignment.Center)
-                            .fillMaxWidth(0.92f)
-                            .offset(y = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SecondaryPlayerButton(
-                        icon = Icons.Filled.SkipPrevious,
-                        onClick = state::skipPrevious,
-                        size = 46.dp,
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    )
-                    PrimaryPlayerButton(
-                        icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        onClick = state::togglePlayPause,
-                        size = 82.dp
-                    )
-                    SecondaryPlayerButton(
-                        icon = Icons.Filled.SkipNext,
-                        onClick = state::skipNext,
-                        size = 46.dp,
-                        modifier = Modifier.align(Alignment.CenterEnd)
-                    )
-                }
+                            .offset(y = controlCenterY),
+                    size = 84.dp
+                )
+
+                SecondaryPlayerButton(
+                    icon = Icons.Filled.SkipPrevious,
+                    onClick = state::skipPrevious,
+                    size = 46.dp,
+                    modifier =
+                        Modifier
+                            .align(Alignment.Center)
+                            .offset(x = -sideOffset, y = controlCenterY)
+                )
+
+                SecondaryPlayerButton(
+                    icon = Icons.Filled.SkipNext,
+                    onClick = state::skipNext,
+                    size = 46.dp,
+                    modifier =
+                        Modifier
+                            .align(Alignment.Center)
+                            .offset(x = sideOffset, y = controlCenterY)
+                )
 
                 Row(
                     modifier =
                         Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth(0.78f),
+                            .align(Alignment.Center)
+                            .fillMaxWidth(0.74f)
+                            .offset(y = utilityOffsetY),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
