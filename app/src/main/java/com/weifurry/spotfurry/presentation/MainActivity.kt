@@ -181,7 +181,7 @@ private fun HomeRoute(
             val utilitySize = 28.dp
             val sideOffset = 62.dp
             val utilityOffsetY = 58.dp
-            val clusterOffsetY = 14.dp
+            val clusterOffsetY = 22.dp
 
             Box(
                 modifier =
@@ -207,7 +207,7 @@ private fun HomeRoute(
                         Modifier
                             .align(Alignment.TopCenter)
                             .fillMaxWidth(0.72f)
-                            .padding(top = 22.dp)
+                            .padding(top = 16.dp)
                             .clickable(onClick = onOpenNowPlaying),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -240,7 +240,7 @@ private fun HomeRoute(
                     )
                     Text(
                         text = state.playbackSummary,
-                        modifier = Modifier.padding(top = 6.dp),
+                        modifier = Modifier.padding(top = 8.dp),
                         fontSize = 10.sp,
                         color = Color(0xFF909090),
                         maxLines = 1,
