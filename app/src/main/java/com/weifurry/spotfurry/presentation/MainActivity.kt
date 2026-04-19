@@ -193,7 +193,7 @@ private fun HomeRoute(
         ) {
             val safeHorizontal = maxWidth * 0.18f
             val safeTop = maxHeight * 0.16f
-            val safeBottom = maxHeight * 0.15f
+            val safeBottom = maxHeight * 0.10f
 
             Box(
                 modifier =
@@ -257,7 +257,7 @@ private fun HomeRoute(
                         Modifier
                             .align(Alignment.Center)
                             .fillMaxWidth()
-                            .offset(y = 20.dp),
+                            .offset(y = 12.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     SecondaryPlayerButton(
@@ -283,28 +283,29 @@ private fun HomeRoute(
                     modifier =
                         Modifier
                             .align(Alignment.BottomCenter)
-                            .fillMaxWidth(0.88f),
+                            .fillMaxWidth(0.84f)
+                            .offset(y = 6.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.VolumeUp,
                         onClick = { state.changeVolume(5) },
-                        size = 32.dp,
-                        iconSize = 15.dp
+                        size = 31.dp,
+                        iconSize = 14.dp
                     )
                     SmallIconBubble(
                         icon = Icons.Filled.Shuffle,
                         onClick = state::toggleShuffle,
-                        size = 32.dp,
-                        iconSize = 15.dp,
+                        size = 31.dp,
+                        iconSize = 14.dp,
                         highlighted = state.shuffleEnabled
                     )
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.QueueMusic,
                         onClick = onOpenQueue,
-                        size = 32.dp,
-                        iconSize = 15.dp
+                        size = 31.dp,
+                        iconSize = 14.dp
                     )
                 }
             }
