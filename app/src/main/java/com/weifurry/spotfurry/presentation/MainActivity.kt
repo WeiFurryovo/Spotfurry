@@ -16,16 +16,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.weight
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.QueueMusic
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -202,7 +201,7 @@ private fun HomeRoute(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SmallIconBubble(
-                    icon = Icons.Filled.QueueMusic,
+                    icon = Icons.AutoMirrored.Filled.QueueMusic,
                     onClick = onOpenQueue,
                     size = 38.dp,
                     iconSize = 18.dp
@@ -263,7 +262,7 @@ private fun HomeRoute(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .weight(1f),
+                            .padding(vertical = 6.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     SecondaryPlayerButton(
@@ -297,7 +296,7 @@ private fun HomeRoute(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SmallIconBubble(
-                        icon = Icons.Filled.VolumeUp,
+                        icon = Icons.AutoMirrored.Filled.VolumeUp,
                         onClick = { state.changeVolume(5) },
                         size = 36.dp,
                         iconSize = 18.dp
