@@ -176,30 +176,27 @@ private fun HomeRoute(
                     .clip(androidx.compose.foundation.shape.CircleShape)
                     .background(Color(0xFF050505))
         ) {
-            val safeHorizontal = maxWidth * 0.18f
-            val safeTop = maxHeight * 0.14f
-            val safeBottom = maxHeight * 0.14f
-            val controlCenterY = maxHeight * 0.08f
-            val sideOffset = maxWidth * 0.24f
-            val utilityOffsetY = maxHeight * 0.31f
+            val mainSize = 74.dp
+            val sideSize = 40.dp
+            val utilitySize = 28.dp
+            val sideOffset = 54.dp
+            val utilityOffsetY = 58.dp
+            val clusterOffsetY = 14.dp
 
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .padding(
-                            start = safeHorizontal,
-                            end = safeHorizontal,
-                            top = safeTop,
-                            bottom = safeBottom
-                        )
             ) {
                 SmallIconBubble(
                     icon = Icons.Filled.LibraryMusic,
                     onClick = onOpenLibrary,
-                    size = 28.dp,
+                    size = 30.dp,
                     iconSize = 13.dp,
-                    modifier = Modifier.align(Alignment.TopEnd),
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 22.dp, end = 18.dp),
                     bubbleColor = Color(0xFF1D1D1D),
                     borderColor = Color(0xFF2A2A2A),
                     iconTint = Color(0xFFDCDCDC)
@@ -209,7 +206,8 @@ private fun HomeRoute(
                     modifier =
                         Modifier
                             .align(Alignment.TopCenter)
-                            .fillMaxWidth(0.84f)
+                            .fillMaxWidth(0.72f)
+                            .padding(top = 22.dp)
                             .clickable(onClick = onOpenNowPlaying),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -223,8 +221,8 @@ private fun HomeRoute(
                     )
                     Text(
                         text = state.currentTrack.title,
-                        modifier = Modifier.padding(top = 3.dp),
-                        fontSize = 18.sp,
+                        modifier = Modifier.padding(top = 6.dp),
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -233,7 +231,7 @@ private fun HomeRoute(
                     )
                     Text(
                         text = state.currentTrack.artist,
-                        modifier = Modifier.padding(top = 2.dp),
+                        modifier = Modifier.padding(top = 4.dp),
                         fontSize = 13.sp,
                         color = Color(0xFFB5B5B5),
                         maxLines = 1,
@@ -242,7 +240,7 @@ private fun HomeRoute(
                     )
                     Text(
                         text = state.playbackSummary,
-                        modifier = Modifier.padding(top = 5.dp),
+                        modifier = Modifier.padding(top = 6.dp),
                         fontSize = 10.sp,
                         color = Color(0xFF909090),
                         maxLines = 1,
@@ -251,50 +249,49 @@ private fun HomeRoute(
                     )
                 }
 
-                PrimaryPlayerButton(
-                    icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                    onClick = state::togglePlayPause,
+                Box(
                     modifier =
                         Modifier
                             .align(Alignment.Center)
-                            .offset(y = controlCenterY),
-                    size = 84.dp
-                )
-
-                SecondaryPlayerButton(
-                    icon = Icons.Filled.SkipPrevious,
-                    onClick = state::skipPrevious,
-                    size = 46.dp,
-                    modifier =
-                        Modifier
-                            .align(Alignment.Center)
-                            .offset(x = -sideOffset, y = controlCenterY)
-                )
-
-                SecondaryPlayerButton(
-                    icon = Icons.Filled.SkipNext,
-                    onClick = state::skipNext,
-                    size = 46.dp,
-                    modifier =
-                        Modifier
-                            .align(Alignment.Center)
-                            .offset(x = sideOffset, y = controlCenterY)
-                )
-
-                Row(
-                    modifier =
-                        Modifier
-                            .align(Alignment.Center)
-                            .fillMaxWidth(0.74f)
-                            .offset(y = utilityOffsetY),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                            .fillMaxSize()
+                            .offset(y = clusterOffsetY)
                 ) {
+                    PrimaryPlayerButton(
+                        icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                        onClick = state::togglePlayPause,
+                        modifier = Modifier.align(Alignment.Center),
+                        size = mainSize
+                    )
+
+                    SecondaryPlayerButton(
+                        icon = Icons.Filled.SkipPrevious,
+                        onClick = state::skipPrevious,
+                        size = sideSize,
+                        modifier =
+                            Modifier
+                                .align(Alignment.Center)
+                                .offset(x = -sideOffset)
+                    )
+
+                    SecondaryPlayerButton(
+                        icon = Icons.Filled.SkipNext,
+                        onClick = state::skipNext,
+                        size = sideSize,
+                        modifier =
+                            Modifier
+                                .align(Alignment.Center)
+                                .offset(x = sideOffset)
+                    )
+
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.VolumeUp,
                         onClick = { state.changeVolume(5) },
-                        size = 34.dp,
+                        size = utilitySize,
                         iconSize = 16.dp,
+                        modifier =
+                            Modifier
+                                .align(Alignment.Center)
+                                .offset(x = (-40).dp, y = utilityOffsetY),
                         bubbleColor = Color(0xFF1D1D1D),
                         borderColor = Color(0xFF2A2A2A),
                         iconTint = Color(0xFFD0D0D0)
@@ -302,8 +299,12 @@ private fun HomeRoute(
                     SmallIconBubble(
                         icon = Icons.Filled.Shuffle,
                         onClick = state::toggleShuffle,
-                        size = 34.dp,
+                        size = utilitySize,
                         iconSize = 16.dp,
+                        modifier =
+                            Modifier
+                                .align(Alignment.Center)
+                                .offset(y = utilityOffsetY),
                         highlighted = state.shuffleEnabled,
                         bubbleColor = Color(0xFF1D1D1D),
                         borderColor = Color(0xFF2A2A2A),
@@ -312,8 +313,12 @@ private fun HomeRoute(
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.QueueMusic,
                         onClick = onOpenQueue,
-                        size = 34.dp,
+                        size = utilitySize,
                         iconSize = 16.dp,
+                        modifier =
+                            Modifier
+                                .align(Alignment.Center)
+                                .offset(x = 40.dp, y = utilityOffsetY),
                         bubbleColor = Color(0xFF1D1D1D),
                         borderColor = Color(0xFF2A2A2A),
                         iconTint = Color(0xFFD0D0D0)
