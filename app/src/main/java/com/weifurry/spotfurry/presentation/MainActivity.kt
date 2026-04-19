@@ -179,7 +179,7 @@ private fun HomeRoute(
             val mainSize = 74.dp
             val sideSize = 40.dp
             val utilitySize = 28.dp
-            val sideOffset = 54.dp
+            val sideOffset = 62.dp
             val utilityOffsetY = 58.dp
             val clusterOffsetY = 14.dp
 
