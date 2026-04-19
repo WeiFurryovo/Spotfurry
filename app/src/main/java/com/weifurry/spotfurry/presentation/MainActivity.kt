@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -191,9 +192,9 @@ private fun HomeRoute(
                         shape = androidx.compose.foundation.shape.CircleShape
                     )
         ) {
-            val safeHorizontal = maxWidth * 0.18f
+            val safeHorizontal = maxWidth * 0.16f
             val safeTop = maxHeight * 0.16f
-            val safeBottom = maxHeight * 0.10f
+            val safeBottom = maxHeight * 0.13f
 
             Box(
                 modifier =
@@ -206,50 +207,66 @@ private fun HomeRoute(
                             bottom = safeBottom
                         )
             ) {
-                SmallIconBubble(
-                    icon = Icons.Filled.LibraryMusic,
-                    onClick = onOpenLibrary,
-                    size = 30.dp,
-                    iconSize = 14.dp,
-                    modifier = Modifier.align(Alignment.TopEnd)
-                )
-
-                Column(
+                Box(
                     modifier =
                         Modifier
                             .align(Alignment.TopCenter)
                             .fillMaxWidth()
-                            .padding(horizontal = 6.dp)
-                            .clickable(onClick = onOpenNowPlaying),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                            .clip(RoundedCornerShape(26.dp))
+                            .background(Color(0x18FFFFFF))
+                            .border(
+                                width = 1.dp,
+                                color = Color(0x18FFFFFF),
+                                shape = RoundedCornerShape(26.dp)
+                            )
+                            .clickable(onClick = onOpenNowPlaying)
+                            .padding(start = 16.dp, end = 10.dp, top = 14.dp, bottom = 14.dp)
                 ) {
-                    Text(
-                        text = state.currentTrack.title,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                    Text(
-                        text = state.currentTrack.artist,
-                        modifier = Modifier.padding(top = 1.dp),
-                        fontSize = 13.sp,
-                        color = Color(0xDDE8F0FF),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = state.playbackSummary,
-                        modifier = Modifier.padding(top = 2.dp),
-                        fontSize = 10.sp,
-                        color = Color(0xDFF2F7FF),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = state.currentTrack.title,
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center,
+                                color = Color.White
+                            )
+                            Text(
+                                text = state.currentTrack.artist,
+                                modifier = Modifier.padding(top = 1.dp),
+                                fontSize = 13.sp,
+                                color = Color(0xDDE8F0FF),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = state.playbackSummary,
+                                modifier = Modifier.padding(top = 3.dp),
+                                fontSize = 10.sp,
+                                color = Color(0xDFF2F7FF),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        SmallIconBubble(
+                            icon = Icons.Filled.LibraryMusic,
+                            onClick = onOpenLibrary,
+                            size = 28.dp,
+                            iconSize = 13.dp
+                        )
+                    }
                 }
 
                 Box(
@@ -257,25 +274,31 @@ private fun HomeRoute(
                         Modifier
                             .align(Alignment.Center)
                             .fillMaxWidth()
-                            .offset(y = 12.dp),
+                            .offset(y = 26.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipPrevious,
                         onClick = state::skipPrevious,
                         size = 44.dp,
-                        modifier = Modifier.align(Alignment.CenterStart)
+                        modifier =
+                            Modifier
+                                .align(Alignment.CenterStart)
+                                .offset(y = 2.dp)
                     )
                     PrimaryPlayerButton(
                         icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         onClick = state::togglePlayPause,
-                        size = 78.dp
+                        size = 74.dp
                     )
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipNext,
                         onClick = state::skipNext,
                         size = 44.dp,
-                        modifier = Modifier.align(Alignment.CenterEnd)
+                        modifier =
+                            Modifier
+                                .align(Alignment.CenterEnd)
+                                .offset(y = 2.dp)
                     )
                 }
 
@@ -283,29 +306,36 @@ private fun HomeRoute(
                     modifier =
                         Modifier
                             .align(Alignment.BottomCenter)
-                            .fillMaxWidth(0.84f)
-                            .offset(y = 6.dp),
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(Color(0x14FFFFFF))
+                            .border(
+                                width = 1.dp,
+                                color = Color(0x14FFFFFF),
+                                shape = RoundedCornerShape(999.dp)
+                            )
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.VolumeUp,
                         onClick = { state.changeVolume(5) },
-                        size = 31.dp,
-                        iconSize = 14.dp
+                        size = 28.dp,
+                        iconSize = 13.dp
                     )
                     SmallIconBubble(
                         icon = Icons.Filled.Shuffle,
                         onClick = state::toggleShuffle,
-                        size = 31.dp,
-                        iconSize = 14.dp,
+                        size = 28.dp,
+                        iconSize = 13.dp,
                         highlighted = state.shuffleEnabled
                     )
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.QueueMusic,
                         onClick = onOpenQueue,
-                        size = 31.dp,
-                        iconSize = 14.dp
+                        size = 28.dp,
+                        iconSize = 13.dp
                     )
                 }
             }
