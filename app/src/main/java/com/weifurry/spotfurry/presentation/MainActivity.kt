@@ -180,8 +180,9 @@ private fun HomeRoute(
             val sideSize = 40.dp
             val utilitySize = 28.dp
             val sideOffset = 62.dp
-            val utilityOffsetY = 58.dp
-            val clusterOffsetY = 22.dp
+            val transportOffsetY = 34.dp
+            val utilityBottomPadding = 26.dp
+            val utilitySpacing = 12.dp
 
             Box(
                 modifier =
@@ -254,7 +255,7 @@ private fun HomeRoute(
                         Modifier
                             .align(Alignment.Center)
                             .fillMaxSize()
-                            .offset(y = clusterOffsetY)
+                            .offset(y = transportOffsetY)
                 ) {
                     PrimaryPlayerButton(
                         icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
@@ -282,16 +283,21 @@ private fun HomeRoute(
                                 .align(Alignment.Center)
                                 .offset(x = sideOffset)
                     )
+                }
 
+                Row(
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = utilityBottomPadding),
+                    horizontalArrangement = Arrangement.spacedBy(utilitySpacing),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.VolumeUp,
                         onClick = { state.changeVolume(5) },
                         size = utilitySize,
                         iconSize = 16.dp,
-                        modifier =
-                            Modifier
-                                .align(Alignment.Center)
-                                .offset(x = (-40).dp, y = utilityOffsetY),
                         bubbleColor = Color(0xFF1D1D1D),
                         borderColor = Color(0xFF2A2A2A),
                         iconTint = Color(0xFFD0D0D0)
@@ -301,10 +307,6 @@ private fun HomeRoute(
                         onClick = state::toggleShuffle,
                         size = utilitySize,
                         iconSize = 16.dp,
-                        modifier =
-                            Modifier
-                                .align(Alignment.Center)
-                                .offset(y = utilityOffsetY),
                         highlighted = state.shuffleEnabled,
                         bubbleColor = Color(0xFF1D1D1D),
                         borderColor = Color(0xFF2A2A2A),
@@ -315,10 +317,6 @@ private fun HomeRoute(
                         onClick = onOpenQueue,
                         size = utilitySize,
                         iconSize = 16.dp,
-                        modifier =
-                            Modifier
-                                .align(Alignment.Center)
-                                .offset(x = 40.dp, y = utilityOffsetY),
                         bubbleColor = Color(0xFF1D1D1D),
                         borderColor = Color(0xFF2A2A2A),
                         iconTint = Color(0xFFD0D0D0)
