@@ -3,6 +3,7 @@ package com.weifurry.spotfurry.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -34,7 +37,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -179,16 +187,28 @@ private fun HomeRoute(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(Color(0xFF050505))
+                    .clip(CircleShape)
+                    .background(
+                        Brush.radialGradient(
+                            colors =
+                                listOf(
+                                    Color(0xFF171717),
+                                    Color(0xFF060606),
+                                    Color(0xFF000000)
+                                )
+                        )
+                    )
         ) {
-            val mainSize = 74.dp
-            val sideSize = 40.dp
-            val utilitySize = 28.dp
-            val sideOffset = 62.dp
-            val transportOffsetY = 34.dp
-            val utilityBottomPadding = 26.dp
-            val utilitySpacing = 12.dp
+            val compact = maxWidth < 220.dp
+            val mainSize = if (compact) 64.dp else 72.dp
+            val sideSize = if (compact) 38.dp else 42.dp
+            val utilitySize = if (compact) 26.dp else 30.dp
+            val progressRingSize = if (compact) 84.dp else 96.dp
+            val sideOffset = if (compact) 64.dp else 76.dp
+            val transportOffsetY = if (compact) 32.dp else 42.dp
+            val utilityBottomPadding = if (compact) 20.dp else 26.dp
+            val utilitySpacing = if (compact) 8.dp else 10.dp
+            val topPadding = if (compact) 26.dp else 34.dp
 
             Box(
                 modifier =
@@ -204,7 +224,7 @@ private fun HomeRoute(
                     modifier =
                         Modifier
                             .align(Alignment.TopEnd)
-                            .padding(top = 22.dp, end = 18.dp),
+                            .padding(top = topPadding, end = 20.dp),
                     bubbleColor = Color(0xFF1D1D1D),
                     borderColor = Color(0xFF2A2A2A),
                     iconTint = Color(0xFFDCDCDC)
@@ -215,22 +235,18 @@ private fun HomeRoute(
                         Modifier
                             .align(Alignment.TopCenter)
                             .fillMaxWidth(0.72f)
-                            .padding(top = 16.dp)
+                            .padding(top = topPadding)
                             .clickable(onClick = onOpenNowPlaying),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
+                    StatusPill(
                         text = if (state.isPlaying) "正在播放" else "已暂停",
-                        fontSize = 10.sp,
-                        color = Color(0xFF8E8E8E),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
+                        active = state.isPlaying
                     )
                     Text(
                         text = state.currentTrack.title,
-                        modifier = Modifier.padding(top = 6.dp),
-                        fontSize = 20.sp,
+                        modifier = Modifier.padding(top = 8.dp),
+                        fontSize = if (compact) 18.sp else 22.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -247,10 +263,10 @@ private fun HomeRoute(
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = state.playbackSummary,
-                        modifier = Modifier.padding(top = 8.dp),
+                        text = state.timeRangeLabel,
+                        modifier = Modifier.padding(top = 7.dp),
                         fontSize = 10.sp,
-                        color = Color(0xFF909090),
+                        color = Color(0xFF7F7F7F),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
@@ -264,6 +280,14 @@ private fun HomeRoute(
                             .fillMaxSize()
                             .offset(y = transportOffsetY)
                 ) {
+                    ProgressRing(
+                        progress = state.progress,
+                        modifier =
+                            Modifier
+                                .align(Alignment.Center)
+                                .size(progressRingSize)
+                    )
+
                     PrimaryPlayerButton(
                         icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         onClick = state::togglePlayPause,
@@ -299,7 +323,15 @@ private fun HomeRoute(
                     modifier =
                         Modifier
                             .align(Alignment.BottomCenter)
-                            .padding(bottom = utilityBottomPadding),
+                            .padding(bottom = utilityBottomPadding)
+                            .clip(RoundedCornerShape(28.dp))
+                            .background(Color(0xB3121212))
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFF242424),
+                                shape = RoundedCornerShape(28.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(utilitySpacing),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -619,6 +651,71 @@ private fun TransformingLazyColumnItemScope.TrackCard(
 }
 
 @Composable
+private fun StatusPill(
+    text: String,
+    active: Boolean
+) {
+    Box(
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(50))
+                .background(if (active) Color(0xFF142018) else Color(0xFF181818))
+                .border(
+                    width = 1.dp,
+                    color = if (active) Color(0xFF24442E) else Color(0xFF2A2A2A),
+                    shape = RoundedCornerShape(50)
+                )
+                .padding(horizontal = 9.dp, vertical = 3.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontSize = 9.sp,
+            color = if (active) Color(0xFF99F7B2) else Color(0xFF9A9A9A),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun ProgressRing(
+    progress: Float,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier) {
+        val strokeWidth = 3.dp.toPx()
+        val inset = strokeWidth / 2
+        val arcSize =
+            Size(
+                width = size.width - strokeWidth,
+                height = size.height - strokeWidth
+            )
+        val topLeft = Offset(inset, inset)
+
+        drawArc(
+            color = Color(0xFF252525),
+            startAngle = -220f,
+            sweepAngle = 260f,
+            useCenter = false,
+            topLeft = topLeft,
+            size = arcSize,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+        )
+        drawArc(
+            color = Color(0xFF8CFFAF),
+            startAngle = -220f,
+            sweepAngle = 260f * progress.coerceIn(0f, 1f),
+            useCenter = false,
+            topLeft = topLeft,
+            size = arcSize,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+        )
+    }
+}
+
+@Composable
 private fun PrimaryPlayerButton(
     icon: ImageVector,
     onClick: () -> Unit,
@@ -630,12 +727,12 @@ private fun PrimaryPlayerButton(
         modifier =
             modifier
                 .size(size)
-                .clip(androidx.compose.foundation.shape.CircleShape)
+                .clip(CircleShape)
                 .background(Color(0xFF2B2B2B))
                 .border(
                     width = 1.dp,
                     color = Color(0xFF373737),
-                    shape = androidx.compose.foundation.shape.CircleShape
+                    shape = CircleShape
                 )
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
@@ -661,12 +758,12 @@ private fun SecondaryPlayerButton(
         modifier =
             modifier
                 .size(size)
-                .clip(androidx.compose.foundation.shape.CircleShape)
+                .clip(CircleShape)
                 .background(Color(0xFF1F1F1F))
                 .border(
                     width = 1.dp,
                     color = Color(0xFF2B2B2B),
-                    shape = androidx.compose.foundation.shape.CircleShape
+                    shape = CircleShape
                 )
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
@@ -697,7 +794,7 @@ private fun SmallIconBubble(
         modifier =
             modifier
                 .size(size)
-                .clip(androidx.compose.foundation.shape.CircleShape)
+                .clip(CircleShape)
                 .background(
                     if (highlighted) {
                         Color(0xFF303030)
@@ -708,7 +805,7 @@ private fun SmallIconBubble(
                 .border(
                     width = 1.dp,
                     color = borderColor,
-                    shape = androidx.compose.foundation.shape.CircleShape
+                    shape = CircleShape
                 )
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
@@ -791,9 +888,21 @@ private class SpotfurryState private constructor(
                 return "暂无播放内容"
             }
 
-            val elapsed = (currentTrack.durationSeconds * progress).toInt()
             val stateLabel = if (isPlaying) "正在播放" else "已暂停"
-            return "$stateLabel  ${formatClock(elapsed)} / ${currentTrack.durationLabel}"
+            return "$stateLabel  $timeRangeLabel"
+        }
+
+    val timeRangeLabel: String
+        get() {
+            if (queue.isEmpty()) {
+                return "0:00 / 0:00"
+            }
+
+            val elapsed =
+                (currentTrack.durationSeconds * progress)
+                    .toInt()
+                    .coerceIn(0, currentTrack.durationSeconds)
+            return "${formatClock(elapsed)} / ${currentTrack.durationLabel}"
         }
 
     val nextTrackLabel: String
