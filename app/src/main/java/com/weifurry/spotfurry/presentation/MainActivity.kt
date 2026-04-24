@@ -202,12 +202,12 @@ private fun HomeRoute(
             val compact = maxWidth < 220.dp
             val mainSize = if (compact) 58.dp else 66.dp
             val sideSize = if (compact) 34.dp else 38.dp
-            val utilitySize = if (compact) 24.dp else 28.dp
+            val utilitySize = if (compact) 22.dp else 24.dp
             val progressRingSize = if (compact) 76.dp else 86.dp
             val sideOffset = if (compact) 62.dp else 74.dp
-            val transportOffsetY = if (compact) 26.dp else 36.dp
-            val utilityRowOffsetY = if (compact) 52.dp else 58.dp
-            val utilitySpacing = if (compact) 12.dp else 16.dp
+            val transportOffsetY = if (compact) 24.dp else 34.dp
+            val utilityRowOffsetY = if (compact) 46.dp else 48.dp
+            val utilitySpacing = if (compact) 10.dp else 14.dp
             val topPadding = if (compact) 20.dp else 28.dp
 
             Box(
@@ -323,7 +323,7 @@ private fun HomeRoute(
                             onClick = { state.changeVolume(5) },
                             contentDescription = "音量加大",
                             size = utilitySize,
-                            iconSize = 16.dp,
+                            iconSize = if (compact) 14.dp else 15.dp,
                             bubbleColor = Color(0xFF1D1D1D),
                             borderColor = Color(0xFF2A2A2A),
                             iconTint = Color(0xFFD0D0D0)
@@ -333,7 +333,7 @@ private fun HomeRoute(
                             onClick = state::toggleShuffle,
                             contentDescription = if (state.shuffleEnabled) "关闭随机播放" else "开启随机播放",
                             size = utilitySize,
-                            iconSize = 16.dp,
+                            iconSize = if (compact) 14.dp else 15.dp,
                             highlighted = state.shuffleEnabled,
                             bubbleColor = Color(0xFF1D1D1D),
                             borderColor = Color(0xFF2A2A2A),
@@ -344,7 +344,7 @@ private fun HomeRoute(
                             onClick = onOpenQueue,
                             contentDescription = "打开播放队列",
                             size = utilitySize,
-                            iconSize = 16.dp,
+                            iconSize = if (compact) 14.dp else 15.dp,
                             bubbleColor = Color(0xFF1D1D1D),
                             borderColor = Color(0xFF2A2A2A),
                             iconTint = Color(0xFFD0D0D0)
