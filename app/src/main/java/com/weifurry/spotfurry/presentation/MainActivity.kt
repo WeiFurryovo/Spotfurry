@@ -200,15 +200,15 @@ private fun HomeRoute(
                     )
         ) {
             val compact = maxWidth < 220.dp
-            val mainSize = if (compact) 64.dp else 72.dp
-            val sideSize = if (compact) 38.dp else 42.dp
-            val utilitySize = if (compact) 26.dp else 30.dp
-            val progressRingSize = if (compact) 84.dp else 96.dp
-            val sideOffset = if (compact) 64.dp else 76.dp
-            val transportOffsetY = if (compact) 32.dp else 42.dp
-            val utilityBottomPadding = if (compact) 20.dp else 26.dp
-            val utilitySpacing = if (compact) 8.dp else 10.dp
-            val topPadding = if (compact) 26.dp else 34.dp
+            val mainSize = if (compact) 58.dp else 66.dp
+            val sideSize = if (compact) 34.dp else 38.dp
+            val utilitySize = if (compact) 24.dp else 28.dp
+            val progressRingSize = if (compact) 76.dp else 86.dp
+            val sideOffset = if (compact) 62.dp else 74.dp
+            val transportOffsetY = if (compact) 24.dp else 30.dp
+            val utilityBottomPadding = if (compact) 22.dp else 30.dp
+            val utilitySpacing = if (compact) 10.dp else 12.dp
+            val topPadding = if (compact) 24.dp else 32.dp
 
             Box(
                 modifier =
@@ -246,7 +246,7 @@ private fun HomeRoute(
                     Text(
                         text = state.currentTrack.title,
                         modifier = Modifier.padding(top = 8.dp),
-                        fontSize = if (compact) 18.sp else 22.sp,
+                        fontSize = if (compact) 18.sp else 21.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -325,13 +325,13 @@ private fun HomeRoute(
                             .align(Alignment.BottomCenter)
                             .padding(bottom = utilityBottomPadding)
                             .clip(RoundedCornerShape(28.dp))
-                            .background(Color(0xB3121212))
+                            .background(Color(0xE00F0F0F))
                             .border(
                                 width = 1.dp,
-                                color = Color(0xFF242424),
+                                color = Color(0xFF202020),
                                 shape = RoundedCornerShape(28.dp)
                             )
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                            .padding(horizontal = 10.dp, vertical = 7.dp),
                     horizontalArrangement = Arrangement.spacedBy(utilitySpacing),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
