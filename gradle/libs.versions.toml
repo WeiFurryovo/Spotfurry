@@ -8,6 +8,7 @@ compose-ui-tooling = "1.6.0"
 androidx-navigation3 = "1.1.0"
 org-jetbrains-kotlin = "2.3.20"
 kotlinx-serialization = "1.10.0"
+junit = "4.13.2"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
@@ -16,6 +17,8 @@ androidx-compose-ui-tooling = { module = "androidx.wear.compose:compose-ui-tooli
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 desugar-jdk-libs = "com.android.tools:desugar_jdk_libs:2.1.5"
+junit = { module = "junit:junit", version.ref = "junit" }
+material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "androidx-wear-compose" }
 wear-compose-material = { module = "androidx.wear.compose:compose-material3", version.ref = "androidx-wear-compose-material3" }
 wear-compose-navigation3 = { module = "androidx.wear.compose:compose-navigation3", version.ref = "androidx-wear-compose" }

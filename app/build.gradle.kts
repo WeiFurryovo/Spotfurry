@@ -64,9 +64,11 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.compose.ui.tooling.preview)
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.material.icons.extended)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    testImplementation(libs.junit)
 
     debugImplementation(libs.compose.ui.tooling)
 }

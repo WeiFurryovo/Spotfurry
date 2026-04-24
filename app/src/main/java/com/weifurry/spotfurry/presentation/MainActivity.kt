@@ -31,6 +31,8 @@ import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -111,8 +113,8 @@ fun SpotfurryApp() {
 
     LaunchedEffect(appState.isPlaying, appState.currentTrack.id) {
         while (appState.isPlaying) {
-            delay(1_200)
-            appState.advancePreview(0.04f)
+            delay(1_000)
+            appState.advancePreviewBySeconds(1)
         }
     }
 
@@ -834,10 +836,11 @@ enum class RepeatMode(val label: String) {
     Track("单曲循环")
 }
 
-private class SpotfurryState private constructor(
+internal class SpotfurryState internal constructor(
     val playlists: List<Playlist>,
     initialQueue: List<Track>,
-    initialTrackId: String
+    initialTrackId: String,
+    private val shuffleTrackIds: (List<String>) -> List<String> = { it.shuffled() }
 ) {
     var queue by mutableStateOf(initialQueue)
         private set
@@ -848,8 +851,14 @@ private class SpotfurryState private constructor(
     var isPlaying by mutableStateOf(true)
         private set
 
-    var isLiked by mutableStateOf(false)
-        private set
+    private var likedTrackIds by mutableStateOf(emptySet<String>())
+
+    val isLiked: Boolean
+        get() = queue.isNotEmpty() && currentTrack.id in likedTrackIds
+
+    private var shuffleOrder by mutableStateOf(emptyList<String>())
+
+    private var shufflePosition by mutableIntStateOf(0)
 
     var shuffleEnabled by mutableStateOf(false)
         private set
@@ -857,10 +866,10 @@ private class SpotfurryState private constructor(
     var repeatMode by mutableStateOf(RepeatMode.Queue)
         private set
 
-    var progress by mutableStateOf(0.22f)
+    var progress by mutableFloatStateOf(0.22f)
         private set
 
-    var volumePercent by mutableStateOf(72)
+    var volumePercent by mutableIntStateOf(72)
         private set
 
     val currentTrack: Track
@@ -896,10 +905,10 @@ private class SpotfurryState private constructor(
             }
 
             val nextIndex =
-                when {
-                    shuffleEnabled && queue.size > 1 -> (currentIndex() + 2) % queue.size
-                    else -> (currentIndex() + 1) % queue.size
-                }
+                nextTrackId()
+                    ?.let { id -> queue.indexOfFirst { it.id == id } }
+                    ?.takeIf { it != -1 }
+                    ?: return "已到队列末尾"
 
             val nextTrack = queue[nextIndex]
             return "${nextTrack.title}  ${nextTrack.artist}"
@@ -909,6 +918,7 @@ private class SpotfurryState private constructor(
         currentTrackId = track.id
         progress = 0f
         isPlaying = true
+        rebuildShuffleOrderIfNeeded()
     }
 
     fun loadPlaylist(playlist: Playlist) {
@@ -916,10 +926,17 @@ private class SpotfurryState private constructor(
         currentTrackId = playlist.tracks.firstOrNull()?.id ?: EmptyTrack.id
         progress = 0f
         isPlaying = playlist.tracks.isNotEmpty()
-        isLiked = false
+        rebuildShuffleOrderIfNeeded()
     }
 
     fun togglePlayPause() {
+        if (queue.isEmpty()) {
+            return
+        }
+
+        if (!isPlaying && progress >= 1f) {
+            progress = 0f
+        }
         isPlaying = !isPlaying
     }
 
@@ -928,16 +945,18 @@ private class SpotfurryState private constructor(
             return
         }
 
-        val nextIndex =
-            when {
-                repeatMode == RepeatMode.Track -> currentIndex()
-                shuffleEnabled && queue.size > 1 -> (currentIndex() + 2) % queue.size
-                else -> (currentIndex() + 1) % queue.size
-            }
+        ensureShuffleOrder()
+        val nextTrackId = nextTrackId()
+        if (nextTrackId == null) {
+            progress = 1f
+            isPlaying = false
+            return
+        }
 
-        currentTrackId = queue[nextIndex].id
+        currentTrackId = nextTrackId
         progress = 0f
         isPlaying = true
+        syncShufflePosition()
     }
 
     fun skipPrevious() {
@@ -950,24 +969,36 @@ private class SpotfurryState private constructor(
             return
         }
 
-        val previousIndex =
-            when {
-                queue.size <= 1 -> 0
-                shuffleEnabled -> (currentIndex() - 2).floorMod(queue.size)
-                else -> (currentIndex() - 1).floorMod(queue.size)
-            }
+        ensureShuffleOrder()
+        val previousTrackId = previousTrackId() ?: currentTrackId
 
-        currentTrackId = queue[previousIndex].id
+        currentTrackId = previousTrackId
         progress = 0f
         isPlaying = true
+        syncShufflePosition()
     }
 
     fun toggleLike() {
-        isLiked = !isLiked
+        if (queue.isEmpty()) {
+            return
+        }
+
+        likedTrackIds =
+            if (isLiked) {
+                likedTrackIds - currentTrack.id
+            } else {
+                likedTrackIds + currentTrack.id
+            }
     }
 
     fun toggleShuffle() {
         shuffleEnabled = !shuffleEnabled
+        if (shuffleEnabled) {
+            rebuildShuffleOrder()
+        } else {
+            shuffleOrder = emptyList()
+            shufflePosition = 0
+        }
     }
 
     fun cycleRepeat() {
@@ -983,12 +1014,13 @@ private class SpotfurryState private constructor(
         volumePercent = (volumePercent + delta).coerceIn(0, 100)
     }
 
-    fun advancePreview(step: Float) {
+    fun advancePreviewBySeconds(seconds: Int) {
         if (queue.isEmpty()) {
             return
         }
 
-        val nextProgress = progress + step
+        val durationSeconds = currentTrack.durationSeconds.coerceAtLeast(1)
+        val nextProgress = progress + seconds.toFloat() / durationSeconds
         if (nextProgress < 1f) {
             progress = nextProgress
             return
@@ -996,9 +1028,121 @@ private class SpotfurryState private constructor(
 
         when (repeatMode) {
             RepeatMode.Track -> progress = 0f
-            RepeatMode.Off,
             RepeatMode.Queue -> skipNext()
+            RepeatMode.Off -> {
+                ensureShuffleOrder()
+                if (nextTrackId() == null) {
+                    progress = 1f
+                    isPlaying = false
+                } else {
+                    skipNext()
+                }
+            }
         }
+    }
+
+    private fun nextTrackId(): String? {
+        if (queue.isEmpty()) {
+            return null
+        }
+
+        if (repeatMode == RepeatMode.Track) {
+            return currentTrackId
+        }
+
+        if (shuffleEnabled) {
+            val order = activeShuffleOrder()
+            val nextPosition = currentShufflePosition(order) + 1
+            if (nextPosition < order.size) {
+                return order[nextPosition]
+            }
+            return if (repeatMode == RepeatMode.Queue) order.firstOrNull() else null
+        }
+
+        val nextIndex = currentIndex() + 1
+        if (nextIndex < queue.size) {
+            return queue[nextIndex].id
+        }
+        return if (repeatMode == RepeatMode.Queue) queue.firstOrNull()?.id else null
+    }
+
+    private fun previousTrackId(): String? {
+        if (queue.isEmpty()) {
+            return null
+        }
+
+        if (repeatMode == RepeatMode.Track) {
+            return currentTrackId
+        }
+
+        if (shuffleEnabled) {
+            val order = activeShuffleOrder()
+            val previousPosition = currentShufflePosition(order) - 1
+            if (previousPosition >= 0) {
+                return order[previousPosition]
+            }
+            return if (repeatMode == RepeatMode.Queue) order.lastOrNull() else null
+        }
+
+        val previousIndex = currentIndex() - 1
+        if (previousIndex >= 0) {
+            return queue[previousIndex].id
+        }
+        return if (repeatMode == RepeatMode.Queue) queue.lastOrNull()?.id else null
+    }
+
+    private fun ensureShuffleOrder() {
+        if (!shuffleEnabled) {
+            return
+        }
+
+        val queueIds = queue.map { it.id }
+        if (shuffleOrder.toSet() != queueIds.toSet() || currentTrackId !in shuffleOrder) {
+            rebuildShuffleOrder()
+            return
+        }
+
+        syncShufflePosition()
+    }
+
+    private fun activeShuffleOrder(): List<String> {
+        val queueIds = queue.map { it.id }
+        if (shuffleOrder.toSet() == queueIds.toSet() && currentTrackId in shuffleOrder) {
+            return shuffleOrder
+        }
+
+        return listOf(currentTrack.id) + queueIds.filterNot { it == currentTrack.id }
+    }
+
+    private fun currentShufflePosition(order: List<String>): Int =
+        order.indexOf(currentTrackId).takeIf { it >= 0 } ?: 0
+
+    private fun rebuildShuffleOrderIfNeeded() {
+        if (shuffleEnabled) {
+            rebuildShuffleOrder()
+        }
+    }
+
+    private fun rebuildShuffleOrder() {
+        val queueIds = queue.map { it.id }
+        if (queueIds.isEmpty()) {
+            shuffleOrder = emptyList()
+            shufflePosition = 0
+            return
+        }
+
+        val currentId = currentTrack.id
+        val remainingIds = queueIds.filterNot { it == currentId }
+        shuffleOrder = listOf(currentId) + shuffleTrackIds(remainingIds)
+        shufflePosition = 0
+    }
+
+    private fun syncShufflePosition() {
+        if (!shuffleEnabled) {
+            return
+        }
+
+        shufflePosition = shuffleOrder.indexOf(currentTrackId).takeIf { it >= 0 } ?: 0
     }
 
     private fun currentIndex(): Int {
@@ -1057,8 +1201,6 @@ private class SpotfurryState private constructor(
         }
     }
 }
-
-private fun Int.floorMod(other: Int): Int = ((this % other) + other) % other
 
 private fun formatClock(seconds: Int): String {
     val minutes = seconds / 60
