@@ -17,3 +17,6 @@ internal data object LibraryScreen : SpotfurryScreen
 
 @Serializable
 internal data object QueueScreen : SpotfurryScreen
+
+@Serializable
+internal data object AppleMusicScreen : SpotfurryScreen

@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.navigation3.rememberSwipeDismissableSceneStrategy
+import com.weifurry.spotfurry.presentation.navigation.AppleMusicScreen
 import com.weifurry.spotfurry.presentation.navigation.HomeScreen
 import com.weifurry.spotfurry.presentation.navigation.LibraryScreen
 import com.weifurry.spotfurry.presentation.navigation.NowPlayingScreen
@@ -16,6 +17,7 @@ import com.weifurry.spotfurry.presentation.navigation.QueueScreen
 import com.weifurry.spotfurry.presentation.navigation.SpotfurryScreen
 import com.weifurry.spotfurry.presentation.player.SpotfurryState
 import com.weifurry.spotfurry.presentation.routes.HomeRoute
+import com.weifurry.spotfurry.presentation.routes.AppleMusicRoute
 import com.weifurry.spotfurry.presentation.routes.LibraryRoute
 import com.weifurry.spotfurry.presentation.routes.NowPlayingRoute
 import com.weifurry.spotfurry.presentation.routes.QueueRoute
@@ -64,6 +66,7 @@ internal fun SpotfurryApp() {
                             LibraryRoute(
                                 state = appState,
                                 onOpenNowPlaying = { navigateTo(NowPlayingScreen) },
+                                onOpenAppleMusic = { navigateTo(AppleMusicScreen) },
                                 onQueueLoaded = { playlist ->
                                     appState.loadPlaylist(playlist)
                                     navigateTo(NowPlayingScreen)
@@ -77,6 +80,11 @@ internal fun SpotfurryApp() {
                                     appState.playTrack(track)
                                     navigateTo(NowPlayingScreen)
                                 }
+                            )
+                        }
+                        entry<AppleMusicScreen> {
+                            AppleMusicRoute(
+                                onOpenLibrary = { navigateTo(LibraryScreen) }
                             )
                         }
                     }

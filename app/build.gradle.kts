@@ -16,6 +16,17 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+
+        resValue(
+            "string",
+            "apple_music_developer_token",
+            providers.gradleProperty("spotfurry.appleMusicDeveloperToken").orElse("").get()
+        )
+        resValue(
+            "string",
+            "apple_music_test_song_id",
+            providers.gradleProperty("spotfurry.appleMusicTestSongId").orElse("").get()
+        )
     }
 
     buildTypes {
@@ -43,6 +54,7 @@ android {
 
     buildFeatures {
         compose = true
+        resValues = true
     }
 
     packaging {
@@ -65,6 +77,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.material.icons.extended)
+    implementation(fileTree("libs") { include("*.jar", "*.aar") })
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 

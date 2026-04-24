@@ -22,6 +22,7 @@ import com.weifurry.spotfurry.presentation.player.SpotfurryState
 internal fun LibraryRoute(
     state: SpotfurryState,
     onOpenNowPlaying: () -> Unit,
+    onOpenAppleMusic: () -> Unit,
     onQueueLoaded: (Playlist) -> Unit
 ) {
     val listState = rememberTransformingLazyColumnState()
@@ -61,6 +62,14 @@ internal fun LibraryRoute(
                     title = "固定歌单",
                     body = "已准备 ${state.playlists.size} 个适合手表场景的歌单",
                     onClick = {},
+                    transformationSpec = transformationSpec
+                )
+            }
+            item {
+                TrackCard(
+                    title = "Apple Music 实验",
+                    body = "检测 MusicKit SDK，登录后测试在手表内在线播放",
+                    onClick = onOpenAppleMusic,
                     transformationSpec = transformationSpec
                 )
             }
