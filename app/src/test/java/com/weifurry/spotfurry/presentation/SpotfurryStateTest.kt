@@ -1,5 +1,8 @@
 package com.weifurry.spotfurry.presentation
 
+import com.weifurry.spotfurry.presentation.model.Playlist
+import com.weifurry.spotfurry.presentation.model.Track
+import com.weifurry.spotfurry.presentation.player.SpotfurryState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
