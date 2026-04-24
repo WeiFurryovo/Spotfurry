@@ -95,6 +95,12 @@ fun SpotfurryApp() {
     val appState = remember { SpotfurryState.preview() }
     val backStack = rememberNavBackStack(HomeScreen)
 
+    fun navigateTo(screen: SpotfurryScreen) {
+        if (backStack.lastOrNull() != screen) {
+            backStack.add(screen)
+        }
+    }
+
     LaunchedEffect(appState.isPlaying, appState.currentTrack.id) {
         while (appState.isPlaying) {
             delay(1_200)
@@ -110,25 +116,25 @@ fun SpotfurryApp() {
                         entry<HomeScreen> {
                             HomeRoute(
                                 state = appState,
-                                onOpenNowPlaying = { backStack.add(NowPlayingScreen) },
-                                onOpenLibrary = { backStack.add(LibraryScreen) },
-                                onOpenQueue = { backStack.add(QueueScreen) }
+                                onOpenNowPlaying = { navigateTo(NowPlayingScreen) },
+                                onOpenLibrary = { navigateTo(LibraryScreen) },
+                                onOpenQueue = { navigateTo(QueueScreen) }
                             )
                         }
                         entry<NowPlayingScreen> {
                             NowPlayingRoute(
                                 state = appState,
-                                onOpenQueue = { backStack.add(QueueScreen) },
-                                onOpenLibrary = { backStack.add(LibraryScreen) }
+                                onOpenQueue = { navigateTo(QueueScreen) },
+                                onOpenLibrary = { navigateTo(LibraryScreen) }
                             )
                         }
                         entry<LibraryScreen> {
                             LibraryRoute(
                                 state = appState,
-                                onOpenNowPlaying = { backStack.add(NowPlayingScreen) },
+                                onOpenNowPlaying = { navigateTo(NowPlayingScreen) },
                                 onQueueLoaded = { playlist ->
                                     appState.loadPlaylist(playlist)
-                                    backStack.add(NowPlayingScreen)
+                                    navigateTo(NowPlayingScreen)
                                 }
                             )
                         }
@@ -137,7 +143,7 @@ fun SpotfurryApp() {
                                 state = appState,
                                 onSelectTrack = { track ->
                                     appState.playTrack(track)
-                                    backStack.add(NowPlayingScreen)
+                                    navigateTo(NowPlayingScreen)
                                 }
                             )
                         }
@@ -192,6 +198,7 @@ private fun HomeRoute(
                 SmallIconBubble(
                     icon = Icons.Filled.LibraryMusic,
                     onClick = onOpenLibrary,
+                    contentDescription = "打开音乐库",
                     size = 30.dp,
                     iconSize = 13.dp,
                     modifier =
@@ -260,6 +267,7 @@ private fun HomeRoute(
                     PrimaryPlayerButton(
                         icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         onClick = state::togglePlayPause,
+                        contentDescription = if (state.isPlaying) "暂停" else "播放",
                         modifier = Modifier.align(Alignment.Center),
                         size = mainSize
                     )
@@ -267,6 +275,7 @@ private fun HomeRoute(
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipPrevious,
                         onClick = state::skipPrevious,
+                        contentDescription = "上一首",
                         size = sideSize,
                         modifier =
                             Modifier
@@ -277,6 +286,7 @@ private fun HomeRoute(
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipNext,
                         onClick = state::skipNext,
+                        contentDescription = "下一首",
                         size = sideSize,
                         modifier =
                             Modifier
@@ -296,6 +306,7 @@ private fun HomeRoute(
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.VolumeUp,
                         onClick = { state.changeVolume(5) },
+                        contentDescription = "音量加大",
                         size = utilitySize,
                         iconSize = 16.dp,
                         bubbleColor = Color(0xFF1D1D1D),
@@ -305,6 +316,7 @@ private fun HomeRoute(
                     SmallIconBubble(
                         icon = Icons.Filled.Shuffle,
                         onClick = state::toggleShuffle,
+                        contentDescription = if (state.shuffleEnabled) "关闭随机播放" else "开启随机播放",
                         size = utilitySize,
                         iconSize = 16.dp,
                         highlighted = state.shuffleEnabled,
@@ -315,6 +327,7 @@ private fun HomeRoute(
                     SmallIconBubble(
                         icon = Icons.AutoMirrored.Filled.QueueMusic,
                         onClick = onOpenQueue,
+                        contentDescription = "打开播放队列",
                         size = utilitySize,
                         iconSize = 16.dp,
                         bubbleColor = Color(0xFF1D1D1D),
@@ -609,6 +622,7 @@ private fun TransformingLazyColumnItemScope.TrackCard(
 private fun PrimaryPlayerButton(
     icon: ImageVector,
     onClick: () -> Unit,
+    contentDescription: String,
     modifier: Modifier = Modifier,
     size: Dp = 90.dp
 ) {
@@ -628,7 +642,7 @@ private fun PrimaryPlayerButton(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = contentDescription,
             tint = Color(0xFFF0F0F0),
             modifier = Modifier.size(size * 0.42f)
         )
@@ -639,6 +653,7 @@ private fun PrimaryPlayerButton(
 private fun SecondaryPlayerButton(
     icon: ImageVector,
     onClick: () -> Unit,
+    contentDescription: String,
     size: Dp,
     modifier: Modifier = Modifier
 ) {
@@ -658,7 +673,7 @@ private fun SecondaryPlayerButton(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = contentDescription,
             tint = Color(0xFFD8D8D8),
             modifier = Modifier.size(size * 0.46f)
         )
@@ -669,6 +684,7 @@ private fun SecondaryPlayerButton(
 private fun SmallIconBubble(
     icon: ImageVector,
     onClick: () -> Unit,
+    contentDescription: String,
     modifier: Modifier = Modifier,
     size: Dp = 40.dp,
     iconSize: Dp = 19.dp,
@@ -699,7 +715,7 @@ private fun SmallIconBubble(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = contentDescription,
             tint = iconTint,
             modifier = Modifier.size(iconSize)
         )
@@ -722,6 +738,14 @@ data class Playlist(
     val subtitle: String,
     val tracks: List<Track>
 )
+
+private val EmptyTrack =
+    Track(
+        id = "empty",
+        title = "暂无播放",
+        artist = "等待播放内容",
+        durationSeconds = 0
+    )
 
 enum class RepeatMode(val label: String) {
     Off("关闭"),
@@ -759,10 +783,14 @@ private class SpotfurryState private constructor(
         private set
 
     val currentTrack: Track
-        get() = queue.firstOrNull { it.id == currentTrackId } ?: queue.first()
+        get() = queue.firstOrNull { it.id == currentTrackId } ?: queue.firstOrNull() ?: EmptyTrack
 
     val playbackSummary: String
         get() {
+            if (queue.isEmpty()) {
+                return "暂无播放内容"
+            }
+
             val elapsed = (currentTrack.durationSeconds * progress).toInt()
             val stateLabel = if (isPlaying) "正在播放" else "已暂停"
             return "$stateLabel  ${formatClock(elapsed)} / ${currentTrack.durationLabel}"
@@ -792,9 +820,9 @@ private class SpotfurryState private constructor(
 
     fun loadPlaylist(playlist: Playlist) {
         queue = playlist.tracks
-        currentTrackId = playlist.tracks.first().id
+        currentTrackId = playlist.tracks.firstOrNull()?.id ?: EmptyTrack.id
         progress = 0f
-        isPlaying = true
+        isPlaying = playlist.tracks.isNotEmpty()
         isLiked = false
     }
 
@@ -820,6 +848,10 @@ private class SpotfurryState private constructor(
     }
 
     fun skipPrevious() {
+        if (queue.isEmpty()) {
+            return
+        }
+
         if (progress > 0.12f) {
             progress = 0f
             return
@@ -859,6 +891,10 @@ private class SpotfurryState private constructor(
     }
 
     fun advancePreview(step: Float) {
+        if (queue.isEmpty()) {
+            return
+        }
+
         val nextProgress = progress + step
         if (nextProgress < 1f) {
             progress = nextProgress
