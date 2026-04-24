@@ -32,7 +32,7 @@ android {
             "apple_music_pairing_base_url",
             providers
                 .gradleProperty("spotfurry.appleMusicPairingBaseUrl")
-                .orElse("https://spotfurry.invalid/apple-music/pair")
+                .orElse("")
                 .get()
         )
     }

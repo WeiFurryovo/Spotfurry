@@ -19,6 +19,17 @@ class AppleMusicPairingSessionTest {
     }
 
     @Test
+    fun pairingUrlReturnsNullWhenBackendIsMissing() {
+        val session =
+            AppleMusicPairingSession(
+                code = "WXYZ-5678",
+                expiresAtEpochMillis = 0L
+            )
+
+        assertEquals(null, buildAppleMusicPairingUrl("", session))
+    }
+
+    @Test
     fun pairingUrlAddsProviderAndEncodedCode() {
         val session =
             AppleMusicPairingSession(

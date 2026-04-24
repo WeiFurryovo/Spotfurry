@@ -4,9 +4,6 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import kotlin.random.Random
 
-internal const val DEFAULT_APPLE_MUSIC_PAIRING_BASE_URL =
-    "https://spotfurry.invalid/apple-music/pair"
-
 internal data class AppleMusicPairingSession(
     val code: String,
     val expiresAtEpochMillis: Long
@@ -39,11 +36,11 @@ internal data class AppleMusicPairingSession(
 internal fun buildAppleMusicPairingUrl(
     baseUrl: String,
     session: AppleMusicPairingSession
-): String {
+): String? {
     val normalizedBaseUrl =
         baseUrl
             .trim()
-            .ifBlank { DEFAULT_APPLE_MUSIC_PAIRING_BASE_URL }
+            .ifBlank { return null }
 
     val separator =
         when {

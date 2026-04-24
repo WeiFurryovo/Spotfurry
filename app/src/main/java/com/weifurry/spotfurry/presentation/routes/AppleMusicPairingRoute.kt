@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -136,20 +137,30 @@ internal fun AppleMusicPairingRoute(
                 )
             }
 
-            Box(
-                modifier =
-                    Modifier
-                        .align(Alignment.Center)
-                        .offset(y = if (compact) 8.dp else 10.dp)
-                        .clip(RoundedCornerShape(if (compact) 18.dp else 22.dp))
-                        .background(Color.White)
-                        .padding(qrPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                QrCodeImage(
-                    content = pairingUrl,
-                    contentDescription = "Apple Music 配对二维码",
-                    modifier = Modifier.size(qrSize)
+            if (pairingUrl != null) {
+                Box(
+                    modifier =
+                        Modifier
+                            .align(Alignment.Center)
+                            .offset(y = if (compact) 8.dp else 10.dp)
+                            .clip(RoundedCornerShape(if (compact) 18.dp else 22.dp))
+                            .background(Color.White)
+                            .padding(qrPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    QrCodeImage(
+                        content = pairingUrl,
+                        contentDescription = "Apple Music 配对二维码",
+                        modifier = Modifier.size(qrSize)
+                    )
+                }
+            } else {
+                MissingPairingBackendCard(
+                    compact = compact,
+                    modifier =
+                        Modifier
+                            .align(Alignment.Center)
+                            .offset(y = if (compact) 8.dp else 10.dp)
                 )
             }
 
@@ -172,10 +183,10 @@ internal fun AppleMusicPairingRoute(
                 )
                 Text(
                     text =
-                        if (config.hasCustomPairingBridge) {
+                        if (pairingUrl != null) {
                             "二维码 5 分钟内有效"
                         } else {
-                            "扫码地址当前是占位地址"
+                            "不会生成无效二维码"
                         },
                     modifier = Modifier.padding(top = 2.dp),
                     color = Color(0xFF9E9E9E),
@@ -200,6 +211,44 @@ internal fun AppleMusicPairingRoute(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun MissingPairingBackendCard(
+    compact: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier =
+            modifier
+                .widthIn(max = if (compact) 128.dp else 152.dp)
+                .clip(RoundedCornerShape(if (compact) 18.dp else 22.dp))
+                .background(Color(0xFF141414))
+                .border(
+                    width = 1.dp,
+                    color = Color(0xFF313131),
+                    shape = RoundedCornerShape(if (compact) 18.dp else 22.dp)
+                )
+                .padding(horizontal = if (compact) 14.dp else 16.dp, vertical = 14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "未配置后端",
+            color = Color(0xFFF1F1F1),
+            fontSize = if (compact) 13.sp else 15.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = "设置 PairingBaseUrl 后再生成二维码",
+            modifier = Modifier.padding(top = 6.dp),
+            color = Color(0xFFA8A8A8),
+            fontSize = if (compact) 8.sp else 9.sp,
+            lineHeight = if (compact) 11.sp else 12.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }
 

@@ -15,9 +15,7 @@ internal data class AppleMusicConfig(
         get() = testSongId.isNotBlank()
 
     val hasCustomPairingBridge: Boolean
-        get() =
-            pairingBaseUrl.isNotBlank() &&
-                pairingBaseUrl != DEFAULT_APPLE_MUSIC_PAIRING_BASE_URL
+        get() = pairingBaseUrl.isNotBlank()
 
     companion object {
         fun fromResources(context: Context): AppleMusicConfig =
