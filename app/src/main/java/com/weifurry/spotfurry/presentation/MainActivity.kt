@@ -206,8 +206,8 @@ private fun HomeRoute(
             val progressRingSize = if (compact) 76.dp else 86.dp
             val sideOffset = if (compact) 62.dp else 74.dp
             val transportOffsetY = if (compact) 26.dp else 36.dp
-            val utilityRowOffsetY = if (compact) 58.dp else 64.dp
-            val utilitySpacing = if (compact) 10.dp else 12.dp
+            val utilityRowOffsetY = if (compact) 52.dp else 58.dp
+            val utilitySpacing = if (compact) 12.dp else 16.dp
             val topPadding = if (compact) 20.dp else 28.dp
 
             Box(
@@ -219,12 +219,12 @@ private fun HomeRoute(
                     icon = Icons.Filled.LibraryMusic,
                     onClick = onOpenLibrary,
                     contentDescription = "打开音乐库",
-                    size = 30.dp,
-                    iconSize = 13.dp,
+                    size = 28.dp,
+                    iconSize = 12.dp,
                     modifier =
                         Modifier
                             .align(Alignment.TopEnd)
-                            .padding(top = topPadding, end = 20.dp),
+                            .padding(top = topPadding + 10.dp, end = 32.dp),
                     bubbleColor = Color(0xFF1D1D1D),
                     borderColor = Color(0xFF2A2A2A),
                     iconTint = Color(0xFFDCDCDC)
@@ -314,14 +314,7 @@ private fun HomeRoute(
                             Modifier
                                 .align(Alignment.Center)
                                 .offset(y = utilityRowOffsetY)
-                                .clip(RoundedCornerShape(28.dp))
-                                .background(Color(0xE00F0F0F))
-                                .border(
-                                    width = 1.dp,
-                                    color = Color(0xFF202020),
-                                    shape = RoundedCornerShape(28.dp)
-                                )
-                                .padding(horizontal = 10.dp, vertical = 7.dp),
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
                         horizontalArrangement = Arrangement.spacedBy(utilitySpacing),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
