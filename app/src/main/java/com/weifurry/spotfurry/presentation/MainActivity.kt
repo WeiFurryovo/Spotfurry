@@ -203,12 +203,12 @@ private fun HomeRoute(
             val mainSize = if (compact) 58.dp else 66.dp
             val sideSize = if (compact) 34.dp else 38.dp
             val utilitySize = if (compact) 22.dp else 24.dp
-            val progressRingSize = if (compact) 76.dp else 86.dp
+            val progressRingSize = if (compact) 72.dp else 80.dp
             val sideOffset = if (compact) 62.dp else 74.dp
             val transportOffsetY = if (compact) 24.dp else 34.dp
             val utilityRowOffsetY = if (compact) 46.dp else 48.dp
             val utilitySpacing = if (compact) 10.dp else 14.dp
-            val topPadding = if (compact) 20.dp else 28.dp
+            val topPadding = if (compact) 18.dp else 24.dp
 
             Box(
                 modifier =
@@ -245,8 +245,8 @@ private fun HomeRoute(
                     )
                     Text(
                         text = state.currentTrack.title,
-                        modifier = Modifier.padding(top = 8.dp),
-                        fontSize = if (compact) 18.sp else 21.sp,
+                        modifier = Modifier.padding(top = 7.dp),
+                        fontSize = if (compact) 17.sp else 20.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -255,8 +255,8 @@ private fun HomeRoute(
                     )
                     Text(
                         text = state.currentTrack.artist,
-                        modifier = Modifier.padding(top = 4.dp),
-                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 3.dp),
+                        fontSize = if (compact) 11.sp else 12.sp,
                         color = Color(0xFFB5B5B5),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
