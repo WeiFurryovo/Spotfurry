@@ -205,10 +205,10 @@ private fun HomeRoute(
             val utilitySize = if (compact) 24.dp else 28.dp
             val progressRingSize = if (compact) 76.dp else 86.dp
             val sideOffset = if (compact) 62.dp else 74.dp
-            val transportOffsetY = if (compact) 18.dp else 24.dp
-            val utilityRowOffsetY = if (compact) 62.dp else 70.dp
+            val transportOffsetY = if (compact) 26.dp else 36.dp
+            val utilityRowOffsetY = if (compact) 58.dp else 64.dp
             val utilitySpacing = if (compact) 10.dp else 12.dp
-            val topPadding = if (compact) 24.dp else 32.dp
+            val topPadding = if (compact) 20.dp else 28.dp
 
             Box(
                 modifier =
@@ -256,17 +256,8 @@ private fun HomeRoute(
                     Text(
                         text = state.currentTrack.artist,
                         modifier = Modifier.padding(top = 4.dp),
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         color = Color(0xFFB5B5B5),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = state.timeRangeLabel,
-                        modifier = Modifier.padding(top = 7.dp),
-                        fontSize = 10.sp,
-                        color = Color(0xFF7F7F7F),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
