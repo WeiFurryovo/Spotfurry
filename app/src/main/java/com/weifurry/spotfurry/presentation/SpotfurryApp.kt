@@ -10,6 +10,7 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.navigation3.rememberSwipeDismissableSceneStrategy
 import com.weifurry.spotfurry.presentation.navigation.AppleMusicScreen
+import com.weifurry.spotfurry.presentation.navigation.AppleMusicPairingScreen
 import com.weifurry.spotfurry.presentation.navigation.HomeScreen
 import com.weifurry.spotfurry.presentation.navigation.LibraryScreen
 import com.weifurry.spotfurry.presentation.navigation.NowPlayingScreen
@@ -17,6 +18,7 @@ import com.weifurry.spotfurry.presentation.navigation.QueueScreen
 import com.weifurry.spotfurry.presentation.navigation.SpotfurryScreen
 import com.weifurry.spotfurry.presentation.player.SpotfurryState
 import com.weifurry.spotfurry.presentation.routes.HomeRoute
+import com.weifurry.spotfurry.presentation.routes.AppleMusicPairingRoute
 import com.weifurry.spotfurry.presentation.routes.AppleMusicRoute
 import com.weifurry.spotfurry.presentation.routes.LibraryRoute
 import com.weifurry.spotfurry.presentation.routes.NowPlayingRoute
@@ -84,7 +86,17 @@ internal fun SpotfurryApp() {
                         }
                         entry<AppleMusicScreen> {
                             AppleMusicRoute(
-                                onOpenLibrary = { navigateTo(LibraryScreen) }
+                                onOpenLibrary = { navigateTo(LibraryScreen) },
+                                onOpenPairingLogin = { navigateTo(AppleMusicPairingScreen) }
+                            )
+                        }
+                        entry<AppleMusicPairingScreen> {
+                            AppleMusicPairingRoute(
+                                onBack = {
+                                    if (backStack.size > 1) {
+                                        backStack.removeLastOrNull()
+                                    }
+                                }
                             )
                         }
                     }

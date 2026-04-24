@@ -5,7 +5,8 @@ import com.weifurry.spotfurry.R
 
 internal data class AppleMusicConfig(
     val developerToken: String,
-    val testSongId: String
+    val testSongId: String,
+    val pairingBaseUrl: String
 ) {
     val hasDeveloperToken: Boolean
         get() = developerToken.isNotBlank()
@@ -13,11 +14,17 @@ internal data class AppleMusicConfig(
     val hasTestSongId: Boolean
         get() = testSongId.isNotBlank()
 
+    val hasCustomPairingBridge: Boolean
+        get() =
+            pairingBaseUrl.isNotBlank() &&
+                pairingBaseUrl != DEFAULT_APPLE_MUSIC_PAIRING_BASE_URL
+
     companion object {
         fun fromResources(context: Context): AppleMusicConfig =
             AppleMusicConfig(
                 developerToken = context.getString(R.string.apple_music_developer_token),
-                testSongId = context.getString(R.string.apple_music_test_song_id)
+                testSongId = context.getString(R.string.apple_music_test_song_id),
+                pairingBaseUrl = context.getString(R.string.apple_music_pairing_base_url)
             )
     }
 }

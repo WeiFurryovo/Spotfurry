@@ -20,3 +20,6 @@ internal data object QueueScreen : SpotfurryScreen
 
 @Serializable
 internal data object AppleMusicScreen : SpotfurryScreen
+
+@Serializable
+internal data object AppleMusicPairingScreen : SpotfurryScreen

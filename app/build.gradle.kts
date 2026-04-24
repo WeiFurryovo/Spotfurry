@@ -27,6 +27,14 @@ android {
             "apple_music_test_song_id",
             providers.gradleProperty("spotfurry.appleMusicTestSongId").orElse("").get()
         )
+        resValue(
+            "string",
+            "apple_music_pairing_base_url",
+            providers
+                .gradleProperty("spotfurry.appleMusicPairingBaseUrl")
+                .orElse("https://spotfurry.invalid/apple-music/pair")
+                .get()
+        )
     }
 
     buildTypes {
@@ -77,6 +85,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.material.icons.extended)
+    implementation(libs.zxing.core)
     implementation(fileTree("libs") { include("*.jar", "*.aar") })
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
