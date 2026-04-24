@@ -205,8 +205,8 @@ private fun HomeRoute(
             val utilitySize = if (compact) 24.dp else 28.dp
             val progressRingSize = if (compact) 76.dp else 86.dp
             val sideOffset = if (compact) 62.dp else 74.dp
-            val transportOffsetY = if (compact) 24.dp else 30.dp
-            val utilityBottomPadding = if (compact) 22.dp else 30.dp
+            val transportOffsetY = if (compact) 18.dp else 24.dp
+            val utilityRowOffsetY = if (compact) 62.dp else 70.dp
             val utilitySpacing = if (compact) 10.dp else 12.dp
             val topPadding = if (compact) 24.dp else 32.dp
 
@@ -317,55 +317,55 @@ private fun HomeRoute(
                                 .align(Alignment.Center)
                                 .offset(x = sideOffset)
                     )
-                }
 
-                Row(
-                    modifier =
-                        Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = utilityBottomPadding)
-                            .clip(RoundedCornerShape(28.dp))
-                            .background(Color(0xE00F0F0F))
-                            .border(
-                                width = 1.dp,
-                                color = Color(0xFF202020),
-                                shape = RoundedCornerShape(28.dp)
-                            )
-                            .padding(horizontal = 10.dp, vertical = 7.dp),
-                    horizontalArrangement = Arrangement.spacedBy(utilitySpacing),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SmallIconBubble(
-                        icon = Icons.AutoMirrored.Filled.VolumeUp,
-                        onClick = { state.changeVolume(5) },
-                        contentDescription = "音量加大",
-                        size = utilitySize,
-                        iconSize = 16.dp,
-                        bubbleColor = Color(0xFF1D1D1D),
-                        borderColor = Color(0xFF2A2A2A),
-                        iconTint = Color(0xFFD0D0D0)
-                    )
-                    SmallIconBubble(
-                        icon = Icons.Filled.Shuffle,
-                        onClick = state::toggleShuffle,
-                        contentDescription = if (state.shuffleEnabled) "关闭随机播放" else "开启随机播放",
-                        size = utilitySize,
-                        iconSize = 16.dp,
-                        highlighted = state.shuffleEnabled,
-                        bubbleColor = Color(0xFF1D1D1D),
-                        borderColor = Color(0xFF2A2A2A),
-                        iconTint = if (state.shuffleEnabled) Color.White else Color(0xFFD0D0D0)
-                    )
-                    SmallIconBubble(
-                        icon = Icons.AutoMirrored.Filled.QueueMusic,
-                        onClick = onOpenQueue,
-                        contentDescription = "打开播放队列",
-                        size = utilitySize,
-                        iconSize = 16.dp,
-                        bubbleColor = Color(0xFF1D1D1D),
-                        borderColor = Color(0xFF2A2A2A),
-                        iconTint = Color(0xFFD0D0D0)
-                    )
+                    Row(
+                        modifier =
+                            Modifier
+                                .align(Alignment.Center)
+                                .offset(y = utilityRowOffsetY)
+                                .clip(RoundedCornerShape(28.dp))
+                                .background(Color(0xE00F0F0F))
+                                .border(
+                                    width = 1.dp,
+                                    color = Color(0xFF202020),
+                                    shape = RoundedCornerShape(28.dp)
+                                )
+                                .padding(horizontal = 10.dp, vertical = 7.dp),
+                        horizontalArrangement = Arrangement.spacedBy(utilitySpacing),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SmallIconBubble(
+                            icon = Icons.AutoMirrored.Filled.VolumeUp,
+                            onClick = { state.changeVolume(5) },
+                            contentDescription = "音量加大",
+                            size = utilitySize,
+                            iconSize = 16.dp,
+                            bubbleColor = Color(0xFF1D1D1D),
+                            borderColor = Color(0xFF2A2A2A),
+                            iconTint = Color(0xFFD0D0D0)
+                        )
+                        SmallIconBubble(
+                            icon = Icons.Filled.Shuffle,
+                            onClick = state::toggleShuffle,
+                            contentDescription = if (state.shuffleEnabled) "关闭随机播放" else "开启随机播放",
+                            size = utilitySize,
+                            iconSize = 16.dp,
+                            highlighted = state.shuffleEnabled,
+                            bubbleColor = Color(0xFF1D1D1D),
+                            borderColor = Color(0xFF2A2A2A),
+                            iconTint = if (state.shuffleEnabled) Color.White else Color(0xFFD0D0D0)
+                        )
+                        SmallIconBubble(
+                            icon = Icons.AutoMirrored.Filled.QueueMusic,
+                            onClick = onOpenQueue,
+                            contentDescription = "打开播放队列",
+                            size = utilitySize,
+                            iconSize = 16.dp,
+                            bubbleColor = Color(0xFF1D1D1D),
+                            borderColor = Color(0xFF2A2A2A),
+                            iconTint = Color(0xFFD0D0D0)
+                        )
+                    }
                 }
             }
         }
