@@ -140,10 +140,10 @@ internal fun AppleMusicRoute(
                 ActionRowButton(
                     label = "手机扫码登录",
                     detail =
-                        if (config.hasCustomPairingBridge) {
-                            "手表显示二维码，手机完成 Apple Music 授权"
+                        if (config.hasAuthBackend) {
+                            "连接 SpotfurryAuth，手机完成 Apple Music 授权"
                         } else {
-                            "当前使用占位地址，先配置 spotfurry.appleMusicPairingBaseUrl"
+                            "先配置 spotfurry.appleMusicAuthBaseUrl"
                         },
                     onClick = onOpenPairingLogin,
                     transformationSpec = transformationSpec
@@ -276,7 +276,7 @@ private fun statusBody(
         "SDK：${availability.label}",
         "Developer token：${if (config.hasDeveloperToken) "已配置" else "未配置"}",
         "Music user token：${if (hasMusicUserToken) "已登录" else "未登录"}",
-        "扫码后端：${if (config.hasCustomPairingBridge) "已配置" else "未配置"}",
+        "扫码后端：${if (config.hasAuthBackend) "已配置" else "未配置"}",
         "测试歌曲 ID：${if (config.hasTestSongId) config.testSongId else "未配置"}"
     ).joinToString(separator = "\n")
 

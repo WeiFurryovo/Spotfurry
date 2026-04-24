@@ -29,10 +29,10 @@ android {
         )
         resValue(
             "string",
-            "apple_music_pairing_base_url",
+            "apple_music_auth_base_url",
             providers
-                .gradleProperty("spotfurry.appleMusicPairingBaseUrl")
-                .orElse("")
+                .gradleProperty("spotfurry.appleMusicAuthBaseUrl")
+                .orElse("https://spotfurry-auth.weifurry-c80.workers.dev")
                 .get()
         )
     }
