@@ -1,0 +1,557 @@
+package com.weifurry.spotfurry.presentation.routes
+
+import android.annotation.SuppressLint
+import android.view.ViewGroup
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.wear.compose.material3.Text
+import com.weifurry.spotfurry.data.spotify.SpotifyWebPlaybackConfig
+import com.weifurry.spotfurry.presentation.components.SmallIconBubble
+import com.weifurry.spotfurry.presentation.components.StatusPill
+import org.json.JSONObject
+
+@Composable
+internal fun SpotifyWebPlaybackRoute(
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val config = remember(context) { SpotifyWebPlaybackConfig.fromResources(context) }
+
+    if (!config.hasAccessToken) {
+        SpotifyMissingTokenRoute(onBack = onBack)
+        return
+    }
+
+    SpotifyWebPlaybackPlayer(
+        config = config,
+        onBack = onBack
+    )
+}
+
+@Composable
+private fun SpotifyMissingTokenRoute(
+    onBack: () -> Unit
+) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        BoxWithConstraints(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .background(
+                        Brush.radialGradient(
+                            colors =
+                                listOf(
+                                    Color(0xFF123F28),
+                                    Color(0xFF07120D),
+                                    Color.Black
+                                )
+                        )
+                    )
+        ) {
+            val compact = maxWidth < 220.dp
+
+            SmallIconBubble(
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                onClick = onBack,
+                contentDescription = "返回音乐库",
+                size = if (compact) 30.dp else 34.dp,
+                iconSize = if (compact) 15.dp else 17.dp,
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = if (compact) 30.dp else 38.dp, end = 30.dp),
+                bubbleColor = Color(0xFF173B28),
+                borderColor = Color(0xFF24543A),
+                iconTint = Color(0xFFE8FFF0)
+            )
+
+            Column(
+                modifier =
+                    Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth(0.78f)
+                        .clip(RoundedCornerShape(if (compact) 22.dp else 26.dp))
+                        .background(Color(0xE6121B16))
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFF24543A),
+                            shape = RoundedCornerShape(if (compact) 22.dp else 26.dp)
+                        )
+                        .padding(horizontal = if (compact) 14.dp else 18.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                StatusPill(
+                    text = "未配置",
+                    active = false
+                )
+                Text(
+                    text = "Spotify WebView",
+                    modifier = Modifier.padding(top = 8.dp),
+                    color = Color(0xFFF2FFF6),
+                    fontSize = if (compact) 16.sp else 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "先配置 spotfurry.spotifyWebPlaybackAccessToken。需要 Spotify Premium，并且 token 要包含 streaming 权限。",
+                    modifier = Modifier.padding(top = 8.dp),
+                    color = Color(0xFFC6D8CC),
+                    fontSize = if (compact) 9.sp else 10.sp,
+                    lineHeight = if (compact) 12.sp else 13.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@SuppressLint("SetJavaScriptEnabled")
+@Composable
+private fun SpotifyWebPlaybackPlayer(
+    config: SpotifyWebPlaybackConfig,
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val pageHtml = remember(config) { spotifyWebPlaybackHtml(config) }
+    val webView = remember {
+        WebView(context).apply {
+            layoutParams =
+                ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            setBackgroundColor(android.graphics.Color.BLACK)
+            webChromeClient = WebChromeClient()
+            webViewClient = WebViewClient()
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.mediaPlaybackRequiresUserGesture = false
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            settings.cacheMode = WebSettings.LOAD_DEFAULT
+            loadDataWithBaseURL(
+                "https://spotfurry.local/spotify/",
+                pageHtml,
+                "text/html",
+                "UTF-8",
+                null
+            )
+        }
+    }
+
+    DisposableEffect(webView) {
+        onDispose {
+            webView.stopLoading()
+            webView.destroy()
+        }
+    }
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        AndroidView(
+            factory = { webView },
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+        )
+        SmallIconBubble(
+            icon = Icons.AutoMirrored.Filled.ArrowBack,
+            onClick = onBack,
+            contentDescription = "返回音乐库",
+            size = 30.dp,
+            iconSize = 15.dp,
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 32.dp, end = 30.dp),
+            bubbleColor = Color(0xB3121B16),
+            borderColor = Color(0x99333333),
+            iconTint = Color.White
+        )
+    }
+}
+
+private fun spotifyWebPlaybackHtml(config: SpotifyWebPlaybackConfig): String {
+    val accessToken = JSONObject.quote(config.accessToken)
+    val playbackUri = JSONObject.quote(config.playbackUri)
+    val configuredUriLabel =
+        escapeHtml(
+            if (config.hasPlaybackUri) {
+                config.playbackUri
+            } else {
+                "未配置，先把手表设为 Spotify 设备"
+            }
+        )
+
+    return """
+        <!doctype html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+          <script src="https://sdk.scdn.co/spotify-player.js"></script>
+          <style>
+            :root {
+              color-scheme: dark;
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+              background: #000;
+              color: #f7fff9;
+            }
+            * {
+              box-sizing: border-box;
+              -webkit-tap-highlight-color: transparent;
+            }
+            html,
+            body {
+              width: 100%;
+              height: 100%;
+              margin: 0;
+              overflow: hidden;
+              background: radial-gradient(circle at 50% 35%, #1db954 0%, #0f3d25 34%, #050806 72%, #000 100%);
+            }
+            body {
+              display: grid;
+              place-items: center;
+            }
+            main {
+              width: 100vw;
+              height: 100vh;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              padding: 28px 24px 24px;
+              text-align: center;
+            }
+            .pill {
+              border: 1px solid rgba(255, 255, 255, 0.2);
+              border-radius: 999px;
+              padding: 3px 9px;
+              background: rgba(0, 0, 0, 0.34);
+              color: #d7ffe2;
+              font-size: 10px;
+              font-weight: 700;
+              letter-spacing: 0.02em;
+            }
+            h1 {
+              margin: 0;
+              max-width: 72vw;
+              color: #ffffff;
+              font-size: 18px;
+              line-height: 1.1;
+            }
+            .track {
+              max-width: 72vw;
+              min-height: 30px;
+              color: #ccefd6;
+              font-size: 10px;
+              line-height: 1.35;
+              word-break: break-word;
+            }
+            .status {
+              width: min(72vw, 180px);
+              min-height: 36px;
+              border: 1px solid rgba(255, 255, 255, 0.14);
+              border-radius: 18px;
+              padding: 8px 10px;
+              background: rgba(0, 0, 0, 0.38);
+              color: #e7ffee;
+              font-size: 10px;
+              line-height: 1.28;
+            }
+            .controls {
+              display: grid;
+              grid-template-columns: repeat(3, 42px);
+              gap: 8px;
+              align-items: center;
+              justify-content: center;
+            }
+            button {
+              width: 42px;
+              height: 42px;
+              border: 1px solid rgba(255, 255, 255, 0.16);
+              border-radius: 50%;
+              background: rgba(0, 0, 0, 0.52);
+              color: #fff;
+              font-size: 16px;
+              font-weight: 800;
+            }
+            button.primary {
+              background: #1ed760;
+              color: #06110a;
+              border-color: rgba(255, 255, 255, 0.32);
+            }
+            button:disabled {
+              opacity: 0.42;
+            }
+            .hint {
+              max-width: 68vw;
+              color: rgba(236, 255, 242, 0.7);
+              font-size: 8px;
+              line-height: 1.25;
+            }
+            @media (max-width: 210px) {
+              main {
+                gap: 6px;
+                padding: 24px 20px 18px;
+              }
+              h1 {
+                font-size: 16px;
+              }
+              .controls {
+                grid-template-columns: repeat(3, 38px);
+                gap: 7px;
+              }
+              button {
+                width: 38px;
+                height: 38px;
+                font-size: 14px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <main>
+            <div id="pill" class="pill">加载 SDK</div>
+            <h1>Spotify WebView</h1>
+            <div id="track" class="track">$configuredUriLabel</div>
+            <div id="status" class="status">正在载入 Spotify Web Playback SDK</div>
+            <div class="controls">
+              <button id="prev" type="button" disabled>‹</button>
+              <button id="play" class="primary" type="button" disabled>▶</button>
+              <button id="next" type="button" disabled>›</button>
+            </div>
+            <div class="controls">
+              <button id="device" type="button" disabled>⌁</button>
+              <button id="pause" type="button" disabled>Ⅱ</button>
+              <button id="refresh" type="button">↻</button>
+            </div>
+            <div class="hint">Premium + streaming 权限。若不能发声，先在手机 Spotify 中选择 Spotfurry WebView 设备。</div>
+          </main>
+          <script>
+            const config = {
+              token: $accessToken,
+              playbackUri: $playbackUri
+            };
+            let player = null;
+            let deviceId = "";
+            let ready = false;
+
+            const pill = document.getElementById("pill");
+            const status = document.getElementById("status");
+            const track = document.getElementById("track");
+            const play = document.getElementById("play");
+            const pause = document.getElementById("pause");
+            const prev = document.getElementById("prev");
+            const next = document.getElementById("next");
+            const device = document.getElementById("device");
+            const refresh = document.getElementById("refresh");
+
+            function setStatus(message, label = null) {
+              status.textContent = message;
+              if (label) {
+                pill.textContent = label;
+              }
+            }
+
+            function setReady(value) {
+              ready = value;
+              play.disabled = !value;
+              pause.disabled = !value;
+              prev.disabled = !value;
+              next.disabled = !value;
+              device.disabled = !value;
+            }
+
+            async function spotifyFetch(path, options = {}) {
+              const response = await fetch("https://api.spotify.com/v1" + path, {
+                ...options,
+                headers: {
+                  "Authorization": "Bearer " + config.token,
+                  "Content-Type": "application/json",
+                  ...(options.headers || {})
+                }
+              });
+              if (response.status === 204) {
+                return null;
+              }
+              const text = await response.text();
+              if (!response.ok) {
+                throw new Error(text || ("HTTP " + response.status));
+              }
+              return text ? JSON.parse(text) : null;
+            }
+
+            function playbackBody(shouldPlay = true) {
+              const body = {
+                device_ids: [deviceId],
+                play: shouldPlay
+              };
+              return JSON.stringify(body);
+            }
+
+            function playBody() {
+              const uri = config.playbackUri.trim();
+              if (!uri) {
+                return "{}";
+              }
+              if (uri.startsWith("spotify:track:")) {
+                return JSON.stringify({ uris: [uri] });
+              }
+              return JSON.stringify({ context_uri: uri });
+            }
+
+            async function activatePlaybackElement() {
+              if (player && typeof player.activateElement === "function") {
+                await player.activateElement();
+              }
+            }
+
+            async function transferPlayback(shouldPlay = false) {
+              if (!ready) {
+                return;
+              }
+              if (shouldPlay) {
+                await activatePlaybackElement();
+              }
+              await spotifyFetch("/me/player", {
+                method: "PUT",
+                body: playbackBody(shouldPlay)
+              });
+              setStatus("已把播放设备切到手表 WebView", "设备就绪");
+            }
+
+            async function playConfiguredUri() {
+              if (!ready) {
+                return;
+              }
+              await activatePlaybackElement();
+              if (!config.playbackUri.trim()) {
+                await transferPlayback(true);
+                setStatus("未配置 URI，已尝试继续当前 Spotify 队列", "播放中");
+                return;
+              }
+              await spotifyFetch("/me/player/play?device_id=" + encodeURIComponent(deviceId), {
+                method: "PUT",
+                body: playBody()
+              });
+              setStatus("已请求播放配置的 Spotify URI", "播放中");
+            }
+
+            function run(action, loadingText) {
+              setStatus(loadingText);
+              action().catch((error) => {
+                setStatus(error.message || "Spotify 操作失败", "失败");
+              });
+            }
+
+            play.addEventListener("click", () => run(playConfiguredUri, "正在请求播放"));
+            pause.addEventListener("click", () => run(() => player.pause(), "正在暂停"));
+            prev.addEventListener("click", () => run(() => player.previousTrack(), "正在上一首"));
+            next.addEventListener("click", () => run(() => player.nextTrack(), "正在下一首"));
+            device.addEventListener("click", () => run(() => transferPlayback(false), "正在设为播放设备"));
+            refresh.addEventListener("click", () => location.reload());
+
+            window.onSpotifyWebPlaybackSDKReady = () => {
+              player = new Spotify.Player({
+                name: "Spotfurry WebView",
+                getOAuthToken: callback => callback(config.token),
+                volume: 0.72
+              });
+
+              player.addListener("ready", ({ device_id }) => {
+                deviceId = device_id;
+                setReady(true);
+                setStatus("设备已注册。点 ⌁ 设为设备，或点 ▶ 播放 URI。", "设备就绪");
+              });
+
+              player.addListener("not_ready", ({ device_id }) => {
+                setReady(false);
+                setStatus("设备离线：" + device_id, "离线");
+              });
+
+              player.addListener("initialization_error", ({ message }) => setStatus(message, "初始化失败"));
+              player.addListener("authentication_error", ({ message }) => setStatus(message, "鉴权失败"));
+              player.addListener("account_error", ({ message }) => setStatus(message, "账号限制"));
+              player.addListener("playback_error", ({ message }) => setStatus(message, "播放失败"));
+
+              player.addListener("player_state_changed", (state) => {
+                if (!state) {
+                  return;
+                }
+                const current = state.track_window.current_track;
+                const artist = current.artists.map(item => item.name).join(" / ");
+                track.textContent = current.name + " · " + artist;
+                pill.textContent = state.paused ? "已暂停" : "播放中";
+              });
+
+              player.connect().then((success) => {
+                if (!success) {
+                  setStatus("Web Playback SDK 连接失败", "失败");
+                }
+              });
+            };
+
+            window.addEventListener("error", (event) => {
+              setStatus(event.message || "页面脚本错误", "错误");
+            });
+          </script>
+        </body>
+        </html>
+    """.trimIndent()
+}
+
+private fun escapeHtml(value: String): String =
+    buildString(value.length) {
+        value.forEach { character ->
+            when (character) {
+                '&' -> append("&amp;")
+                '<' -> append("&lt;")
+                '>' -> append("&gt;")
+                '"' -> append("&quot;")
+                '\'' -> append("&#39;")
+                else -> append(character)
+            }
+        }
+    }

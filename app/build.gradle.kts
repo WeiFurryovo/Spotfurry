@@ -35,6 +35,16 @@ android {
                 .orElse("https://spotfurry-auth.weifurry-c80.workers.dev")
                 .get()
         )
+        resValue(
+            "string",
+            "spotify_web_playback_access_token",
+            providers.gradleProperty("spotfurry.spotifyWebPlaybackAccessToken").orElse("").get()
+        )
+        resValue(
+            "string",
+            "spotify_web_playback_uri",
+            providers.gradleProperty("spotfurry.spotifyWebPlaybackUri").orElse("").get()
+        )
     }
 
     buildTypes {

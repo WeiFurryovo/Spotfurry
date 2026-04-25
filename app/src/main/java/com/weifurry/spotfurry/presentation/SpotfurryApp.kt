@@ -16,6 +16,7 @@ import com.weifurry.spotfurry.presentation.navigation.LibraryScreen
 import com.weifurry.spotfurry.presentation.navigation.NowPlayingScreen
 import com.weifurry.spotfurry.presentation.navigation.QueueScreen
 import com.weifurry.spotfurry.presentation.navigation.SpotfurryScreen
+import com.weifurry.spotfurry.presentation.navigation.SpotifyWebPlaybackScreen
 import com.weifurry.spotfurry.presentation.player.SpotfurryState
 import com.weifurry.spotfurry.presentation.routes.HomeRoute
 import com.weifurry.spotfurry.presentation.routes.AppleMusicPairingRoute
@@ -23,6 +24,7 @@ import com.weifurry.spotfurry.presentation.routes.AppleMusicRoute
 import com.weifurry.spotfurry.presentation.routes.LibraryRoute
 import com.weifurry.spotfurry.presentation.routes.NowPlayingRoute
 import com.weifurry.spotfurry.presentation.routes.QueueRoute
+import com.weifurry.spotfurry.presentation.routes.SpotifyWebPlaybackRoute
 import com.weifurry.spotfurry.presentation.theme.SpotfurryTheme
 import kotlinx.coroutines.delay
 
@@ -69,6 +71,9 @@ internal fun SpotfurryApp() {
                                 state = appState,
                                 onOpenNowPlaying = { navigateTo(NowPlayingScreen) },
                                 onOpenAppleMusic = { navigateTo(AppleMusicScreen) },
+                                onOpenSpotifyWebPlayback = {
+                                    navigateTo(SpotifyWebPlaybackScreen)
+                                },
                                 onQueueLoaded = { playlist ->
                                     appState.loadPlaylist(playlist)
                                     navigateTo(NowPlayingScreen)
@@ -92,6 +97,15 @@ internal fun SpotfurryApp() {
                         }
                         entry<AppleMusicPairingScreen> {
                             AppleMusicPairingRoute(
+                                onBack = {
+                                    if (backStack.size > 1) {
+                                        backStack.removeLastOrNull()
+                                    }
+                                }
+                            )
+                        }
+                        entry<SpotifyWebPlaybackScreen> {
+                            SpotifyWebPlaybackRoute(
                                 onBack = {
                                     if (backStack.size > 1) {
                                         backStack.removeLastOrNull()

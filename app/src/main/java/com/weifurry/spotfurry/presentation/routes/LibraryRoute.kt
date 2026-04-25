@@ -23,6 +23,7 @@ internal fun LibraryRoute(
     state: SpotfurryState,
     onOpenNowPlaying: () -> Unit,
     onOpenAppleMusic: () -> Unit,
+    onOpenSpotifyWebPlayback: () -> Unit,
     onQueueLoaded: (Playlist) -> Unit
 ) {
     val listState = rememberTransformingLazyColumnState()
@@ -70,6 +71,14 @@ internal fun LibraryRoute(
                     title = "Apple Music 实验",
                     body = "检测 MusicKit SDK，登录后测试在手表内在线播放",
                     onClick = onOpenAppleMusic,
+                    transformationSpec = transformationSpec
+                )
+            }
+            item {
+                TrackCard(
+                    title = "Spotify WebView 实验",
+                    body = "用 Web Playback SDK 尝试把手表变成 Spotify Connect 播放设备",
+                    onClick = onOpenSpotifyWebPlayback,
                     transformationSpec = transformationSpec
                 )
             }

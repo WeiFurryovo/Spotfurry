@@ -23,3 +23,6 @@ internal data object AppleMusicScreen : SpotfurryScreen
 
 @Serializable
 internal data object AppleMusicPairingScreen : SpotfurryScreen
+
+@Serializable
+internal data object SpotifyWebPlaybackScreen : SpotfurryScreen
