@@ -11,6 +11,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -37,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -208,10 +211,11 @@ private fun SpotifyPairingRoute(
                     )
         ) {
             val compact = maxWidth < 220.dp
-            val topPadding = if (compact) 20.dp else 28.dp
-            val qrSize = if (compact) 108.dp else 130.dp
-            val qrPadding = if (compact) 8.dp else 10.dp
-            val bottomPadding = if (compact) 14.dp else 20.dp
+            val topPadding = if (compact) 18.dp else 24.dp
+            val qrSize = if (compact) 88.dp else 118.dp
+            val qrPadding = if (compact) 7.dp else 9.dp
+            val bottomPadding = if (compact) 12.dp else 18.dp
+            val titleWidth = if (compact) 0.58f else 0.68f
             val pillText =
                 when {
                     isAuthorized -> "已登录"
@@ -230,7 +234,7 @@ private fun SpotifyPairingRoute(
                 modifier =
                     Modifier
                         .align(Alignment.TopEnd)
-                        .padding(top = topPadding + 10.dp, end = 30.dp),
+                        .padding(top = topPadding + 12.dp, end = 30.dp),
                 bubbleColor = Color(0xFF173B28),
                 borderColor = Color(0xFF24543A),
                 iconTint = Color(0xFFE8FFF0)
@@ -240,7 +244,7 @@ private fun SpotifyPairingRoute(
                 modifier =
                     Modifier
                         .align(Alignment.TopCenter)
-                        .fillMaxWidth(0.72f)
+                        .fillMaxWidth(titleWidth)
                         .padding(top = topPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -250,24 +254,31 @@ private fun SpotifyPairingRoute(
                 )
                 Text(
                     text = "Spotify 登录",
-                    modifier = Modifier.padding(top = 7.dp),
+                    modifier = Modifier.padding(top = if (compact) 5.dp else 7.dp),
                     color = Color(0xFFF2FFF6),
-                    fontSize = if (compact) 15.sp else 17.sp,
+                    fontSize = if (compact) 14.sp else 17.sp,
+                    lineHeight = if (compact) 16.sp else 19.sp,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center
                 )
-                Text(
-                    text =
-                        if (config.hasAuthBackend) {
-                            "用手机完成授权"
-                        } else {
-                            "先配置配对后端"
-                        },
-                    modifier = Modifier.padding(top = 2.dp),
-                    color = Color(0xFFC6D8CC),
-                    fontSize = if (compact) 9.sp else 10.sp,
-                    textAlign = TextAlign.Center
-                )
+                if (!compact) {
+                    Text(
+                        text =
+                            if (config.hasAuthBackend) {
+                                "用手机完成授权"
+                            } else {
+                                "先配置配对后端"
+                            },
+                        modifier = Modifier.padding(top = 2.dp),
+                        color = Color(0xFFC6D8CC),
+                        fontSize = 10.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
             if (pairingSession != null) {
@@ -275,7 +286,7 @@ private fun SpotifyPairingRoute(
                     modifier =
                         Modifier
                             .align(Alignment.Center)
-                            .offset(y = if (compact) 8.dp else 10.dp)
+                            .offset(y = if (compact) 2.dp else 8.dp)
                             .clip(RoundedCornerShape(if (compact) 18.dp else 22.dp))
                             .background(Color.White)
                             .padding(qrPadding),
@@ -305,7 +316,7 @@ private fun SpotifyPairingRoute(
                     modifier =
                         Modifier
                             .align(Alignment.Center)
-                            .offset(y = if (compact) 8.dp else 10.dp)
+                            .offset(y = if (compact) 14.dp else 16.dp)
                 )
             }
 
@@ -317,38 +328,54 @@ private fun SpotifyPairingRoute(
                         .padding(bottom = bottomPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = pairingSession?.let { "配对码 ${it.code}" } ?: "等待配对",
-                    color = Color(0xFFEDEDED),
-                    fontSize = if (compact) 11.sp else 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = pairingMessage,
-                    modifier = Modifier.padding(top = 2.dp),
-                    color = Color(0xFFBFE7CA),
-                    fontSize = if (compact) 8.sp else 9.sp,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "返回",
-                    modifier = Modifier.padding(top = if (compact) 5.dp else 7.dp),
-                    color = Color(0xFFDCDCDC),
-                    fontSize = 9.sp,
-                    textAlign = TextAlign.Center
-                )
-                SmallIconBubble(
-                    icon = Icons.AutoMirrored.Filled.ArrowBack,
-                    onClick = onBack,
-                    contentDescription = "返回音乐库",
-                    size = if (compact) 26.dp else 30.dp,
-                    iconSize = if (compact) 13.dp else 15.dp,
-                    modifier = Modifier.padding(top = 4.dp),
-                    bubbleColor = Color(0xFF173B28),
-                    borderColor = Color(0xFF24543A),
-                    iconTint = Color(0xFFE8FFF0)
-                )
+                if (pairingSession != null) {
+                    Text(
+                        text = "配对码 ${pairingSession!!.code}",
+                        color = Color(0xFFEDEDED),
+                        fontSize = if (compact) 10.sp else 12.sp,
+                        lineHeight = if (compact) 12.sp else 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = pairingMessage,
+                        modifier = Modifier.padding(top = 1.dp),
+                        color = Color(0xFFBFE7CA),
+                        fontSize = if (compact) 8.sp else 9.sp,
+                        lineHeight = if (compact) 10.sp else 11.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Row(
+                    modifier = Modifier.padding(top = if (pairingSession != null) 5.dp else 0.dp),
+                    horizontalArrangement = Arrangement.spacedBy(if (compact) 10.dp else 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SmallIconBubble(
+                        icon = Icons.AutoMirrored.Filled.ArrowBack,
+                        onClick = onBack,
+                        contentDescription = "返回音乐库",
+                        size = if (compact) 28.dp else 32.dp,
+                        iconSize = if (compact) 14.dp else 16.dp,
+                        bubbleColor = Color(0xFF173B28),
+                        borderColor = Color(0xFF24543A),
+                        iconTint = Color(0xFFE8FFF0)
+                    )
+                    SmallIconBubble(
+                        icon = Icons.Filled.Refresh,
+                        onClick = { sessionKey += 1 },
+                        contentDescription = "刷新 Spotify 二维码",
+                        size = if (compact) 28.dp else 32.dp,
+                        iconSize = if (compact) 14.dp else 16.dp,
+                        bubbleColor = Color(0xFF173B28),
+                        borderColor = Color(0xFF24543A),
+                        iconTint = Color(0xFFE8FFF0)
+                    )
+                }
             }
         }
     }
@@ -364,7 +391,7 @@ private fun SpotifyPairingInfoCard(
     Column(
         modifier =
             modifier
-                .fillMaxWidth(if (compact) 0.58f else 0.66f)
+                .fillMaxWidth(if (compact) 0.62f else 0.66f)
                 .clip(RoundedCornerShape(if (compact) 18.dp else 22.dp))
                 .background(Color(0xE6121B16))
                 .border(
@@ -372,22 +399,30 @@ private fun SpotifyPairingInfoCard(
                     color = Color(0xFF24543A),
                     shape = RoundedCornerShape(if (compact) 18.dp else 22.dp)
                 )
-                .padding(horizontal = if (compact) 14.dp else 16.dp, vertical = 14.dp),
+                .padding(
+                    horizontal = if (compact) 12.dp else 16.dp,
+                    vertical = if (compact) 10.dp else 14.dp
+                ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = title,
             color = Color(0xFFF1F1F1),
             fontSize = if (compact) 13.sp else 15.sp,
+            lineHeight = if (compact) 15.sp else 17.sp,
             fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center
         )
         Text(
             text = body,
-            modifier = Modifier.padding(top = 6.dp),
+            modifier = Modifier.padding(top = if (compact) 4.dp else 6.dp),
             color = Color(0xFFC6D8CC),
             fontSize = if (compact) 8.sp else 9.sp,
             lineHeight = if (compact) 11.sp else 12.sp,
+            maxLines = if (compact) 3 else 4,
+            overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center
         )
     }
