@@ -7,3 +7,5 @@ captures/
 *.iml
 app/libs/*.aar
 app/libs/*.jar
+workers/spotify-auth-worker/wrangler.toml
+workers/spotify-auth-worker/.wrangler/

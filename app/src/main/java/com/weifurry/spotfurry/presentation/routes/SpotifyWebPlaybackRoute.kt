@@ -13,14 +13,22 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,9 +41,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.wear.compose.material3.Text
+import com.weifurry.spotfurry.data.spotify.SpotifyPairingClient
+import com.weifurry.spotfurry.data.spotify.SpotifyPairingStartResponse
+import com.weifurry.spotfurry.data.spotify.SpotifyTokenStore
 import com.weifurry.spotfurry.data.spotify.SpotifyWebPlaybackConfig
+import com.weifurry.spotfurry.presentation.components.QrCodeImage
 import com.weifurry.spotfurry.presentation.components.SmallIconBubble
 import com.weifurry.spotfurry.presentation.components.StatusPill
+import kotlinx.coroutines.delay
 import org.json.JSONObject
 
 @Composable
@@ -44,22 +57,133 @@ internal fun SpotifyWebPlaybackRoute(
 ) {
     val context = LocalContext.current
     val config = remember(context) { SpotifyWebPlaybackConfig.fromResources(context) }
+    val tokenStore = remember(context) { SpotifyTokenStore(context) }
+    var storedAccessToken by remember { mutableStateOf(tokenStore.validAccessToken()) }
+    val accessToken = config.accessToken.ifBlank { storedAccessToken }
 
-    if (!config.hasAccessToken) {
-        SpotifyMissingTokenRoute(onBack = onBack)
+    if (accessToken.isBlank()) {
+        SpotifyPairingRoute(
+            config = config,
+            tokenStore = tokenStore,
+            onAuthorized = {
+                storedAccessToken = tokenStore.validAccessToken()
+            },
+            onBack = onBack
+        )
         return
     }
 
     SpotifyWebPlaybackPlayer(
-        config = config,
+        config = config.withAccessToken(accessToken),
         onBack = onBack
     )
 }
 
 @Composable
-private fun SpotifyMissingTokenRoute(
+private fun SpotifyPairingRoute(
+    config: SpotifyWebPlaybackConfig,
+    tokenStore: SpotifyTokenStore,
+    onAuthorized: () -> Unit,
     onBack: () -> Unit
 ) {
+    val pairingClient = remember { SpotifyPairingClient() }
+    var sessionKey by remember { mutableIntStateOf(0) }
+    var pairingSession by remember {
+        mutableStateOf<SpotifyPairingStartResponse?>(null)
+    }
+    var pairingMessage by remember {
+        mutableStateOf(
+            if (config.hasAuthBackend) {
+                "正在创建二维码"
+            } else {
+                "先配置 Spotify 授权后端"
+            }
+        )
+    }
+    var isLoading by remember { mutableStateOf(false) }
+    var isAuthorized by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(config.authBaseUrl, sessionKey) {
+        pairingSession = null
+        isAuthorized = false
+        errorMessage = null
+
+        if (!config.hasAuthBackend) {
+            isLoading = false
+            pairingMessage = "先配置 spotfurry.spotifyAuthBaseUrl"
+            return@LaunchedEffect
+        }
+
+        isLoading = true
+        pairingMessage = "正在创建二维码"
+        pairingClient
+            .startPairing(config.authBaseUrl)
+            .fold(
+                onSuccess = { session ->
+                    pairingSession = session
+                    pairingMessage = "等待手机扫码授权"
+                },
+                onFailure = { error ->
+                    errorMessage = error.message ?: "二维码创建失败"
+                    pairingMessage = "二维码创建失败"
+                }
+            )
+        isLoading = false
+    }
+
+    LaunchedEffect(pairingSession?.sessionId) {
+        val session = pairingSession ?: return@LaunchedEffect
+
+        while (!isAuthorized && errorMessage == null) {
+            delay(session.pollAfterMs.coerceAtLeast(MIN_SPOTIFY_POLL_INTERVAL_MS).toLong())
+
+            pairingClient
+                .checkStatus(
+                    authBaseUrl = config.authBaseUrl,
+                    sessionId = session.sessionId,
+                    watchSecret = session.watchSecret
+                )
+                .fold(
+                    onSuccess = { status ->
+                        when (status.status) {
+                            "pending" -> {
+                                pairingMessage = "等待手机授权"
+                            }
+                            "authorized" -> {
+                                val accessToken = status.accessToken.orEmpty()
+                                if (accessToken.isBlank()) {
+                                    errorMessage = "后端没有返回 Spotify access token"
+                                    pairingMessage = "登录结果无效"
+                                } else {
+                                    tokenStore.saveAccessToken(
+                                        accessToken = accessToken,
+                                        expiresInSeconds =
+                                            status.expiresIn ?: DEFAULT_SPOTIFY_EXPIRES_IN_SECONDS
+                                    )
+                                    isAuthorized = true
+                                    pairingMessage = "登录成功，正在打开播放器"
+                                    onAuthorized()
+                                }
+                            }
+                            "expired" -> {
+                                errorMessage = "二维码已过期，请刷新"
+                                pairingMessage = "二维码已过期"
+                            }
+                            else -> {
+                                errorMessage = status.error ?: "未知登录状态：${status.status}"
+                                pairingMessage = "登录状态异常"
+                            }
+                        }
+                    },
+                    onFailure = { error ->
+                        errorMessage = error.message ?: "无法读取 Spotify 登录状态"
+                        pairingMessage = "轮询失败"
+                    }
+                )
+        }
+    }
+
     Box(
         modifier =
             Modifier
@@ -84,17 +208,29 @@ private fun SpotifyMissingTokenRoute(
                     )
         ) {
             val compact = maxWidth < 220.dp
+            val topPadding = if (compact) 20.dp else 28.dp
+            val qrSize = if (compact) 108.dp else 130.dp
+            val qrPadding = if (compact) 8.dp else 10.dp
+            val bottomPadding = if (compact) 14.dp else 20.dp
+            val pillText =
+                when {
+                    isAuthorized -> "已登录"
+                    errorMessage != null -> "需要处理"
+                    isLoading -> "创建中"
+                    config.hasAuthBackend -> "手机扫码"
+                    else -> "未配置"
+                }
 
             SmallIconBubble(
-                icon = Icons.AutoMirrored.Filled.ArrowBack,
-                onClick = onBack,
-                contentDescription = "返回音乐库",
+                icon = Icons.Filled.Refresh,
+                onClick = { sessionKey += 1 },
+                contentDescription = "刷新 Spotify 二维码",
                 size = if (compact) 30.dp else 34.dp,
                 iconSize = if (compact) 15.dp else 17.dp,
                 modifier =
                     Modifier
                         .align(Alignment.TopEnd)
-                        .padding(top = if (compact) 30.dp else 38.dp, end = 30.dp),
+                        .padding(top = topPadding + 10.dp, end = 30.dp),
                 bubbleColor = Color(0xFF173B28),
                 borderColor = Color(0xFF24543A),
                 iconTint = Color(0xFFE8FFF0)
@@ -103,40 +239,157 @@ private fun SpotifyMissingTokenRoute(
             Column(
                 modifier =
                     Modifier
-                        .align(Alignment.Center)
-                        .fillMaxWidth(0.78f)
-                        .clip(RoundedCornerShape(if (compact) 22.dp else 26.dp))
-                        .background(Color(0xE6121B16))
-                        .border(
-                            width = 1.dp,
-                            color = Color(0xFF24543A),
-                            shape = RoundedCornerShape(if (compact) 22.dp else 26.dp)
-                        )
-                        .padding(horizontal = if (compact) 14.dp else 18.dp, vertical = 16.dp),
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth(0.72f)
+                        .padding(top = topPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 StatusPill(
-                    text = "未配置",
-                    active = false
+                    text = pillText,
+                    active = config.hasAuthBackend && errorMessage == null
                 )
                 Text(
-                    text = "Spotify WebView",
-                    modifier = Modifier.padding(top = 8.dp),
+                    text = "Spotify 登录",
+                    modifier = Modifier.padding(top = 7.dp),
                     color = Color(0xFFF2FFF6),
-                    fontSize = if (compact) 16.sp else 18.sp,
+                    fontSize = if (compact) 15.sp else 17.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "先配置 spotfurry.spotifyWebPlaybackAccessToken。需要 Spotify Premium，并且 token 要包含 streaming 权限。",
-                    modifier = Modifier.padding(top = 8.dp),
+                    text =
+                        if (config.hasAuthBackend) {
+                            "用手机完成授权"
+                        } else {
+                            "先配置配对后端"
+                        },
+                    modifier = Modifier.padding(top = 2.dp),
                     color = Color(0xFFC6D8CC),
                     fontSize = if (compact) 9.sp else 10.sp,
-                    lineHeight = if (compact) 12.sp else 13.sp,
                     textAlign = TextAlign.Center
                 )
             }
+
+            if (pairingSession != null) {
+                Box(
+                    modifier =
+                        Modifier
+                            .align(Alignment.Center)
+                            .offset(y = if (compact) 8.dp else 10.dp)
+                            .clip(RoundedCornerShape(if (compact) 18.dp else 22.dp))
+                            .background(Color.White)
+                            .padding(qrPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    QrCodeImage(
+                        content = pairingSession!!.pairUrl,
+                        contentDescription = "Spotify 配对二维码",
+                        modifier = Modifier.size(qrSize)
+                    )
+                }
+            } else {
+                SpotifyPairingInfoCard(
+                    title =
+                        when {
+                            isLoading -> "创建二维码"
+                            errorMessage != null -> "连接失败"
+                            else -> "未配置后端"
+                        },
+                    body =
+                        when {
+                            isLoading -> "正在连接 SpotifyAuth"
+                            errorMessage != null -> errorMessage!!
+                            else -> "设置 AuthBaseUrl 后再生成二维码"
+                        },
+                    compact = compact,
+                    modifier =
+                        Modifier
+                            .align(Alignment.Center)
+                            .offset(y = if (compact) 8.dp else 10.dp)
+                )
+            }
+
+            Column(
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth(0.78f)
+                        .padding(bottom = bottomPadding),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = pairingSession?.let { "配对码 ${it.code}" } ?: "等待配对",
+                    color = Color(0xFFEDEDED),
+                    fontSize = if (compact) 11.sp else 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = pairingMessage,
+                    modifier = Modifier.padding(top = 2.dp),
+                    color = Color(0xFFBFE7CA),
+                    fontSize = if (compact) 8.sp else 9.sp,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "返回",
+                    modifier = Modifier.padding(top = if (compact) 5.dp else 7.dp),
+                    color = Color(0xFFDCDCDC),
+                    fontSize = 9.sp,
+                    textAlign = TextAlign.Center
+                )
+                SmallIconBubble(
+                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    onClick = onBack,
+                    contentDescription = "返回音乐库",
+                    size = if (compact) 26.dp else 30.dp,
+                    iconSize = if (compact) 13.dp else 15.dp,
+                    modifier = Modifier.padding(top = 4.dp),
+                    bubbleColor = Color(0xFF173B28),
+                    borderColor = Color(0xFF24543A),
+                    iconTint = Color(0xFFE8FFF0)
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun SpotifyPairingInfoCard(
+    title: String,
+    body: String,
+    compact: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth(if (compact) 0.58f else 0.66f)
+                .clip(RoundedCornerShape(if (compact) 18.dp else 22.dp))
+                .background(Color(0xE6121B16))
+                .border(
+                    width = 1.dp,
+                    color = Color(0xFF24543A),
+                    shape = RoundedCornerShape(if (compact) 18.dp else 22.dp)
+                )
+                .padding(horizontal = if (compact) 14.dp else 16.dp, vertical = 14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = title,
+            color = Color(0xFFF1F1F1),
+            fontSize = if (compact) 13.sp else 15.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = body,
+            modifier = Modifier.padding(top = 6.dp),
+            color = Color(0xFFC6D8CC),
+            fontSize = if (compact) 8.sp else 9.sp,
+            lineHeight = if (compact) 11.sp else 12.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -555,3 +808,6 @@ private fun escapeHtml(value: String): String =
             }
         }
     }
+
+private const val MIN_SPOTIFY_POLL_INTERVAL_MS = 1_000
+private const val DEFAULT_SPOTIFY_EXPIRES_IN_SECONDS = 3_600

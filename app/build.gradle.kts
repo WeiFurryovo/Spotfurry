@@ -45,6 +45,14 @@ android {
             "spotify_web_playback_uri",
             providers.gradleProperty("spotfurry.spotifyWebPlaybackUri").orElse("").get()
         )
+        resValue(
+            "string",
+            "spotify_auth_base_url",
+            providers
+                .gradleProperty("spotfurry.spotifyAuthBaseUrl")
+                .orElse("https://spotfurry-auth.weifurry-c80.workers.dev")
+                .get()
+        )
     }
 
     buildTypes {
