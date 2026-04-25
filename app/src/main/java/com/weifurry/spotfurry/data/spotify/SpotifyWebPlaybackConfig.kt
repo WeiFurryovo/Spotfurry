@@ -8,9 +8,6 @@ internal data class SpotifyWebPlaybackConfig(
     val playbackUri: String,
     val authBaseUrl: String
 ) {
-    val hasAccessToken: Boolean
-        get() = accessToken.isNotBlank()
-
     val hasPlaybackUri: Boolean
         get() = playbackUri.isNotBlank()
 

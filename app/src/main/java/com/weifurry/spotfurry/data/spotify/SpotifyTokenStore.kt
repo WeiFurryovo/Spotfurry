@@ -9,9 +9,6 @@ internal class SpotifyTokenStore(context: Context) {
             Context.MODE_PRIVATE
         )
 
-    val hasValidAccessToken: Boolean
-        get() = validAccessToken().isNotBlank()
-
     fun validAccessToken(nowMillis: Long = System.currentTimeMillis()): String {
         val accessToken = preferences.getString(KEY_ACCESS_TOKEN, "").orEmpty()
         val expiresAtMillis = preferences.getLong(KEY_EXPIRES_AT_MILLIS, 0L)

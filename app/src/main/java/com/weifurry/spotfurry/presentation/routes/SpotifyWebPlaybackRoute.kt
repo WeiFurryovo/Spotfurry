@@ -416,14 +416,17 @@ private fun SpotifyWebPlaybackPlayer(
             settings.mediaPlaybackRequiresUserGesture = false
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
             settings.cacheMode = WebSettings.LOAD_DEFAULT
-            loadDataWithBaseURL(
-                "https://spotfurry.local/spotify/",
-                pageHtml,
-                "text/html",
-                "UTF-8",
-                null
-            )
         }
+    }
+
+    LaunchedEffect(webView, pageHtml) {
+        webView.loadDataWithBaseURL(
+            SPOTIFY_WEBVIEW_BASE_URL,
+            pageHtml,
+            "text/html",
+            "UTF-8",
+            null
+        )
     }
 
     DisposableEffect(webView) {
@@ -811,3 +814,4 @@ private fun escapeHtml(value: String): String =
 
 private const val MIN_SPOTIFY_POLL_INTERVAL_MS = 1_000
 private const val DEFAULT_SPOTIFY_EXPIRES_IN_SECONDS = 3_600
+private const val SPOTIFY_WEBVIEW_BASE_URL = "https://spotfurry.local/spotify/"
