@@ -7,5 +7,9 @@ captures/
 *.iml
 app/libs/*.aar
 app/libs/*.jar
+app/signing/*.keystore
+!app/signing/spotfurry-debug.keystore
+app/signing/*.jks
+app/signing/*.p12
 workers/spotify-auth-worker/wrangler.toml
 workers/spotify-auth-worker/.wrangler/

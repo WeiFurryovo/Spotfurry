@@ -55,7 +55,20 @@ android {
         )
     }
 
+    signingConfigs {
+        create("spotfurryDebug") {
+            storeFile = rootProject.file("app/signing/spotfurry-debug.keystore")
+            storePassword = "spotfurry"
+            keyAlias = "spotfurry-debug"
+            keyPassword = "spotfurry"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("spotfurryDebug")
+        }
+
         release {
             isMinifyEnabled = true
             isShrinkResources = true
