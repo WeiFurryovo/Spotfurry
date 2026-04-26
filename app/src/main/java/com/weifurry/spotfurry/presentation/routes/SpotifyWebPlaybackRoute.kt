@@ -1,6 +1,7 @@
 package com.weifurry.spotfurry.presentation.routes
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
@@ -8,6 +9,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -78,6 +80,10 @@ internal fun SpotifyWebPlaybackRoute(
 
     SpotifyWebPlaybackPlayer(
         config = config.withAccessToken(accessToken),
+        onClearLogin = {
+            tokenStore.clear()
+            storedAccessToken = ""
+        },
         onBack = onBack
     )
 }
@@ -432,27 +438,25 @@ private fun SpotifyPairingInfoCard(
 @Composable
 private fun SpotifyWebPlaybackPlayer(
     config: SpotifyWebPlaybackConfig,
+    onClearLogin: () -> Unit,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val pageHtml = remember(config) { spotifyWebPlaybackHtml(config) }
-    val webView = remember {
-        WebView(context).apply {
-            layoutParams =
-                ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-            setBackgroundColor(android.graphics.Color.BLACK)
-            webChromeClient = WebChromeClient()
-            webViewClient = WebViewClient()
-            settings.javaScriptEnabled = true
-            settings.domStorageEnabled = true
-            settings.mediaPlaybackRequiresUserGesture = false
-            settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-            settings.cacheMode = WebSettings.LOAD_DEFAULT
-        }
+    val webViewResult = remember(context) { runCatching { createSpotifyWebView(context) } }
+    val webView = webViewResult.getOrNull()
+
+    if (webView == null) {
+        SpotifyWebViewUnavailableRoute(
+            errorMessage =
+                webViewResult.exceptionOrNull()?.message
+                    ?: "当前系统没有可用的 WebView Provider",
+            onBack = onBack,
+            onClearLogin = onClearLogin
+        )
+        return
     }
+
+    val pageHtml = remember(config) { spotifyWebPlaybackHtml(config) }
 
     LaunchedEffect(webView, pageHtml) {
         webView.loadDataWithBaseURL(
@@ -501,6 +505,116 @@ private fun SpotifyWebPlaybackPlayer(
         )
     }
 }
+
+@Composable
+private fun SpotifyWebViewUnavailableRoute(
+    errorMessage: String,
+    onBack: () -> Unit,
+    onClearLogin: () -> Unit
+) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        BoxWithConstraints(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .background(
+                        Brush.radialGradient(
+                            colors =
+                                listOf(
+                                    Color(0xFF153321),
+                                    Color(0xFF07120D),
+                                    Color.Black
+                                )
+                        )
+                    )
+        ) {
+            val compact = maxWidth < 220.dp
+
+            Column(
+                modifier =
+                    Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth(if (compact) 0.74f else 0.70f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                StatusPill(
+                    text = "WebView 不可用",
+                    active = false
+                )
+                Text(
+                    text = "无法打开播放器",
+                    modifier = Modifier.padding(top = if (compact) 7.dp else 9.dp),
+                    color = Color(0xFFF2FFF6),
+                    fontSize = if (compact) 16.sp else 18.sp,
+                    lineHeight = if (compact) 18.sp else 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text =
+                        "Spotify 登录已成功，但当前手表系统没有可用 WebView，无法运行 Web Playback SDK。",
+                    modifier = Modifier.padding(top = if (compact) 7.dp else 9.dp),
+                    color = Color(0xFFC6D8CC),
+                    fontSize = if (compact) 9.sp else 10.sp,
+                    lineHeight = if (compact) 12.sp else 14.sp,
+                    maxLines = 5,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "系统返回：$errorMessage",
+                    modifier = Modifier.padding(top = if (compact) 5.dp else 7.dp),
+                    color = Color(0xFF8FA898),
+                    fontSize = if (compact) 8.sp else 9.sp,
+                    lineHeight = if (compact) 10.sp else 11.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+                Row(
+                    modifier = Modifier.padding(top = if (compact) 10.dp else 14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SpotifyTextButton(
+                        text = "返回",
+                        onClick = onBack
+                    )
+                    SpotifyTextButton(
+                        text = "清除登录",
+                        onClick = onClearLogin
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun createSpotifyWebView(context: Context): WebView =
+    WebView(context).apply {
+        layoutParams =
+            ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        setBackgroundColor(android.graphics.Color.BLACK)
+        webChromeClient = WebChromeClient()
+        webViewClient = WebViewClient()
+        settings.javaScriptEnabled = true
+        settings.domStorageEnabled = true
+        settings.mediaPlaybackRequiresUserGesture = false
+        settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+        settings.cacheMode = WebSettings.LOAD_DEFAULT
+    }
 
 private fun spotifyWebPlaybackHtml(config: SpotifyWebPlaybackConfig): String {
     val accessToken = JSONObject.quote(config.accessToken)
@@ -846,6 +960,35 @@ private fun escapeHtml(value: String): String =
             }
         }
     }
+
+@Composable
+private fun SpotifyTextButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(50))
+                .background(Color(0xE6173B28))
+                .border(
+                    width = 1.dp,
+                    color = Color(0xFF24543A),
+                    shape = RoundedCornerShape(50)
+                )
+                .clickable(onClick = onClick)
+                .padding(horizontal = 10.dp, vertical = 5.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = Color(0xFFE8FFF0),
+            fontSize = 9.sp,
+            maxLines = 1,
+            textAlign = TextAlign.Center
+        )
+    }
+}
 
 private const val MIN_SPOTIFY_POLL_INTERVAL_MS = 1_000
 private const val DEFAULT_SPOTIFY_EXPIRES_IN_SECONDS = 3_600
