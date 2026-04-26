@@ -54,6 +54,9 @@ internal class SpotfurryState internal constructor(
     var volumePercent by mutableIntStateOf(72)
         private set
 
+    var externalSourceLabel by mutableStateOf<String?>(null)
+        private set
+
     val currentTrack: Track
         get() = queue.firstOrNull { it.id == currentTrackId } ?: queue.firstOrNull() ?: EmptyTrack
 
@@ -64,7 +67,8 @@ internal class SpotfurryState internal constructor(
             }
 
             val stateLabel = if (isPlaying) "正在播放" else "已暂停"
-            return "$stateLabel  $timeRangeLabel"
+            val sourceLabel = externalSourceLabel?.let { "  $it" }.orEmpty()
+            return "$stateLabel  $timeRangeLabel$sourceLabel"
         }
 
     val timeRangeLabel: String
@@ -100,6 +104,7 @@ internal class SpotfurryState internal constructor(
         currentTrackId = track.id
         progress = 0f
         isPlaying = true
+        externalSourceLabel = null
         rebuildShuffleOrderIfNeeded()
     }
 
@@ -108,7 +113,49 @@ internal class SpotfurryState internal constructor(
         currentTrackId = playlist.tracks.firstOrNull()?.id ?: EmptyTrack.id
         progress = 0f
         isPlaying = playlist.tracks.isNotEmpty()
+        externalSourceLabel = null
         rebuildShuffleOrderIfNeeded()
+    }
+
+    fun syncSpotifyPlayback(
+        track: Track,
+        progress: Float,
+        isPlaying: Boolean,
+        deviceName: String?
+    ) {
+        queue = listOf(track)
+        currentTrackId = track.id
+        this.progress = progress.coerceIn(0f, 1f)
+        this.isPlaying = isPlaying
+        externalSourceLabel =
+            buildString {
+                append("Spotify")
+                if (!deviceName.isNullOrBlank()) {
+                    append(" · ")
+                    append(deviceName)
+                }
+            }
+        rebuildShuffleOrderIfNeeded()
+    }
+
+    fun showSpotifyPlaybackNotice(
+        title: String,
+        detail: String
+    ) {
+        val statusTrack =
+            Track(
+                id = "spotify-status",
+                title = title,
+                artist = detail,
+                durationSeconds = 0
+            )
+        queue = listOf(statusTrack)
+        currentTrackId = statusTrack.id
+        progress = 0f
+        isPlaying = false
+        externalSourceLabel = "Spotify"
+        shuffleOrder = emptyList()
+        shufflePosition = 0
     }
 
     fun togglePlayPause() {
@@ -203,6 +250,11 @@ internal class SpotfurryState internal constructor(
 
         val durationSeconds = currentTrack.durationSeconds.coerceAtLeast(1)
         val nextProgress = progress + seconds.toFloat() / durationSeconds
+        if (externalSourceLabel != null) {
+            progress = nextProgress.coerceAtMost(1f)
+            return
+        }
+
         if (nextProgress < 1f) {
             progress = nextProgress
             return
