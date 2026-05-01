@@ -1,6 +1,7 @@
 package com.weifurry.spotfurry.presentation
 
 import com.weifurry.spotfurry.presentation.model.Playlist
+import com.weifurry.spotfurry.presentation.model.RepeatMode
 import com.weifurry.spotfurry.presentation.model.Track
 import com.weifurry.spotfurry.presentation.player.SpotfurryState
 import org.junit.Assert.assertEquals
@@ -84,5 +85,30 @@ class SpotfurryStateTest {
         assertEquals("暂无播放", state.currentTrack.title)
         assertFalse(state.isPlaying)
         assertFalse(state.isLiked)
+    }
+
+    @Test
+    fun spotifyPlaybackReplacesPreviewQueueAndKeepsRemoteFlags() {
+        val state = state()
+        val spotifyTrack = Track("spotify:track:1", "Spotify Track", "Spotify Artist", 180)
+
+        state.syncSpotifyPlayback(
+            track = spotifyTrack,
+            progress = 0.5f,
+            isPlaying = true,
+            shuffleEnabled = true,
+            repeatMode = RepeatMode.Track,
+            volumePercent = 35,
+            deviceName = "Watch"
+        )
+
+        assertEquals(spotifyTrack, state.currentTrack)
+        assertEquals(1, state.queue.size)
+        assertEquals(0.5f, state.progress, 0.0001f)
+        assertTrue(state.isPlaying)
+        assertTrue(state.isSpotifyPlayback)
+        assertTrue(state.shuffleEnabled)
+        assertEquals(RepeatMode.Track, state.repeatMode)
+        assertEquals(35, state.volumePercent)
     }
 }

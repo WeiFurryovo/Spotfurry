@@ -21,6 +21,12 @@ import com.weifurry.spotfurry.presentation.player.SpotfurryState
 @Composable
 internal fun NowPlayingRoute(
     state: SpotfurryState,
+    onTogglePlayPause: () -> Unit,
+    onSkipNext: () -> Unit,
+    onSkipPrevious: () -> Unit,
+    onToggleShuffle: () -> Unit,
+    onCycleRepeat: () -> Unit,
+    onVolumeChange: (Int) -> Unit,
     onOpenQueue: () -> Unit,
     onOpenLibrary: () -> Unit
 ) {
@@ -31,7 +37,7 @@ internal fun NowPlayingRoute(
         scrollState = listState,
         edgeButton = {
             EdgeButton(
-                onClick = state::togglePlayPause,
+                onClick = onTogglePlayPause,
                 buttonSize = EdgeButtonSize.ExtraSmall
             ) {
                 Text(if (state.isPlaying) "暂停" else "播放")
@@ -68,7 +74,7 @@ internal fun NowPlayingRoute(
                 ActionRowButton(
                     label = "下一首",
                     detail = state.nextTrackLabel,
-                    onClick = state::skipNext,
+                    onClick = onSkipNext,
                     transformationSpec = transformationSpec
                 )
             }
@@ -76,7 +82,7 @@ internal fun NowPlayingRoute(
                 ActionRowButton(
                     label = "上一首",
                     detail = "重新播放当前歌曲或返回上一首",
-                    onClick = state::skipPrevious,
+                    onClick = onSkipPrevious,
                     transformationSpec = transformationSpec
                 )
             }
@@ -92,7 +98,7 @@ internal fun NowPlayingRoute(
                 ActionRowButton(
                     label = if (state.shuffleEnabled) "随机已开" else "随机已关",
                     detail = "模式：${state.repeatMode.label}",
-                    onClick = state::toggleShuffle,
+                    onClick = onToggleShuffle,
                     transformationSpec = transformationSpec
                 )
             }
@@ -100,7 +106,7 @@ internal fun NowPlayingRoute(
                 ActionRowButton(
                     label = "重复播放",
                     detail = "当前模式：${state.repeatMode.label}",
-                    onClick = state::cycleRepeat,
+                    onClick = onCycleRepeat,
                     transformationSpec = transformationSpec
                 )
             }
@@ -108,7 +114,7 @@ internal fun NowPlayingRoute(
                 ActionRowButton(
                     label = "音量 +5",
                     detail = "当前音量 ${state.volumePercent}%",
-                    onClick = { state.changeVolume(5) },
+                    onClick = { onVolumeChange(5) },
                     transformationSpec = transformationSpec
                 )
             }
@@ -116,7 +122,7 @@ internal fun NowPlayingRoute(
                 ActionRowButton(
                     label = "音量 -5",
                     detail = "当前音量 ${state.volumePercent}%",
-                    onClick = { state.changeVolume(-5) },
+                    onClick = { onVolumeChange(-5) },
                     transformationSpec = transformationSpec
                 )
             }

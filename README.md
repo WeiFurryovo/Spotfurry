@@ -157,7 +157,7 @@ spotfurry.appleMusicAuthBaseUrl=https://你的 SpotfurryAuth Worker
 - 技术路线：在 Wear OS WebView 内加载 Spotify Web Playback SDK，把手表尝试注册为 `Spotfurry WebView` 播放设备
 - 配置方式：使用本机 Gradle 属性，不要写入仓库内的 `gradle.properties`
 - 账号要求：需要 Spotify Premium
-- 权限要求：测试 token 至少需要 `streaming`、`user-read-email`、`user-read-private`、`user-modify-playback-state`、`user-read-playback-state`
+- 权限要求：测试 token 至少需要 `streaming`、`user-read-email`、`user-read-private`、`user-modify-playback-state`、`user-read-playback-state`、`user-read-currently-playing`
 - 风险说明：Wear OS WebView 对 DRM、后台播放、电量和音频焦点的支持不一定稳定，所以这仍然是实验模式
 
 本机测试时建议把配置放到 `~/.gradle/gradle.properties`：

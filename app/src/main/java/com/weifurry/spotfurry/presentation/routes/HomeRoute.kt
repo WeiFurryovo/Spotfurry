@@ -44,6 +44,11 @@ import com.weifurry.spotfurry.presentation.player.SpotfurryState
 @Composable
 internal fun HomeRoute(
     state: SpotfurryState,
+    onTogglePlayPause: () -> Unit,
+    onSkipPrevious: () -> Unit,
+    onSkipNext: () -> Unit,
+    onVolumeUp: () -> Unit,
+    onToggleShuffle: () -> Unit,
     onOpenNowPlaying: () -> Unit,
     onOpenLibrary: () -> Unit,
     onOpenQueue: () -> Unit
@@ -153,7 +158,7 @@ internal fun HomeRoute(
 
                     PrimaryPlayerButton(
                         icon = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        onClick = state::togglePlayPause,
+                        onClick = onTogglePlayPause,
                         contentDescription = if (state.isPlaying) "暂停" else "播放",
                         modifier = Modifier.align(Alignment.Center),
                         size = mainSize
@@ -161,7 +166,7 @@ internal fun HomeRoute(
 
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipPrevious,
-                        onClick = state::skipPrevious,
+                        onClick = onSkipPrevious,
                         contentDescription = "上一首",
                         size = sideSize,
                         modifier =
@@ -172,7 +177,7 @@ internal fun HomeRoute(
 
                     SecondaryPlayerButton(
                         icon = Icons.Filled.SkipNext,
-                        onClick = state::skipNext,
+                        onClick = onSkipNext,
                         contentDescription = "下一首",
                         size = sideSize,
                         modifier =
@@ -192,7 +197,7 @@ internal fun HomeRoute(
                     ) {
                         SmallIconBubble(
                             icon = Icons.AutoMirrored.Filled.VolumeUp,
-                            onClick = { state.changeVolume(5) },
+                            onClick = onVolumeUp,
                             contentDescription = "音量加大",
                             size = utilitySize,
                             iconSize = if (compact) 14.dp else 15.dp,
@@ -202,7 +207,7 @@ internal fun HomeRoute(
                         )
                         SmallIconBubble(
                             icon = Icons.Filled.Shuffle,
-                            onClick = state::toggleShuffle,
+                            onClick = onToggleShuffle,
                             contentDescription = if (state.shuffleEnabled) "关闭随机播放" else "开启随机播放",
                             size = utilitySize,
                             iconSize = if (compact) 14.dp else 15.dp,

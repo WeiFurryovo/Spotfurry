@@ -21,6 +21,7 @@ import com.weifurry.spotfurry.presentation.player.SpotfurryState
 @Composable
 internal fun QueueRoute(
     state: SpotfurryState,
+    onSkipNext: () -> Unit,
     onSelectTrack: (Track) -> Unit
 ) {
     val listState = rememberTransformingLazyColumnState()
@@ -30,7 +31,7 @@ internal fun QueueRoute(
         scrollState = listState,
         edgeButton = {
             EdgeButton(
-                onClick = state::skipNext,
+                onClick = onSkipNext,
                 buttonSize = EdgeButtonSize.ExtraSmall
             ) {
                 Text("跳过")

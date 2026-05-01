@@ -57,6 +57,9 @@ internal class SpotfurryState internal constructor(
     var externalSourceLabel by mutableStateOf<String?>(null)
         private set
 
+    val isSpotifyPlayback: Boolean
+        get() = externalSourceLabel?.startsWith("Spotify") == true
+
     val currentTrack: Track
         get() = queue.firstOrNull { it.id == currentTrackId } ?: queue.firstOrNull() ?: EmptyTrack
 
@@ -121,12 +124,20 @@ internal class SpotfurryState internal constructor(
         track: Track,
         progress: Float,
         isPlaying: Boolean,
+        shuffleEnabled: Boolean,
+        repeatMode: RepeatMode,
+        volumePercent: Int?,
         deviceName: String?
     ) {
         queue = listOf(track)
         currentTrackId = track.id
         this.progress = progress.coerceIn(0f, 1f)
         this.isPlaying = isPlaying
+        this.shuffleEnabled = shuffleEnabled
+        this.repeatMode = repeatMode
+        volumePercent?.let {
+            this.volumePercent = it.coerceIn(0, 100)
+        }
         externalSourceLabel =
             buildString {
                 append("Spotify")
