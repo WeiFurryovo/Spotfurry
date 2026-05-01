@@ -3,6 +3,7 @@ package com.weifurry.spotfurry.presentation.routes
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.ViewGroup
+import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -607,7 +608,7 @@ private fun createSpotifyWebView(context: Context): WebView =
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         setBackgroundColor(android.graphics.Color.BLACK)
-        webChromeClient = WebChromeClient()
+        webChromeClient = SpotifyWebChromeClient()
         webViewClient = WebViewClient()
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
@@ -615,6 +616,25 @@ private fun createSpotifyWebView(context: Context): WebView =
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         settings.cacheMode = WebSettings.LOAD_DEFAULT
     }
+
+private class SpotifyWebChromeClient : WebChromeClient() {
+    override fun onPermissionRequest(request: PermissionRequest) {
+        val grantedResources =
+            request.resources
+                .filter { resource -> resource in allowedPermissionResources }
+                .toTypedArray()
+
+        if (grantedResources.isEmpty()) {
+            request.deny()
+        } else {
+            request.grant(grantedResources)
+        }
+    }
+
+    private companion object {
+        val allowedPermissionResources = setOf(PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID)
+    }
+}
 
 private fun spotifyWebPlaybackHtml(config: SpotifyWebPlaybackConfig): String {
     val accessToken = JSONObject.quote(config.accessToken)
@@ -891,6 +911,18 @@ private fun spotifyWebPlaybackHtml(config: SpotifyWebPlaybackConfig): String {
               });
             }
 
+            function webPlaybackUnsupportedMessage(message) {
+              const details = message ? "Spotify 返回：" + message : "当前 WebView 没有提供受保护媒体能力。";
+              return "当前手表 WebView 不支持 Spotify Web Playback SDK 所需的 DRM/受保护媒体能力。"
+                + " 请安装/启用支持受保护媒体的 WebView，或改用 Spotify 官方 Wear OS App 作为播放设备。"
+                + "\n" + details;
+            }
+
+            function hasProtectedMediaSupport() {
+              return window.isSecureContext === true
+                && typeof navigator.requestMediaKeySystemAccess === "function";
+            }
+
             play.addEventListener("click", () => run(playConfiguredUri, "正在请求播放"));
             pause.addEventListener("click", () => run(() => player.pause(), "正在暂停"));
             prev.addEventListener("click", () => run(() => player.previousTrack(), "正在上一首"));
@@ -899,6 +931,12 @@ private fun spotifyWebPlaybackHtml(config: SpotifyWebPlaybackConfig): String {
             refresh.addEventListener("click", () => location.reload());
 
             window.onSpotifyWebPlaybackSDKReady = () => {
+              if (!hasProtectedMediaSupport()) {
+                setReady(false);
+                setStatus(webPlaybackUnsupportedMessage(), "初始化失败");
+                return;
+              }
+
               player = new Spotify.Player({
                 name: "Spotfurry WebView",
                 getOAuthToken: callback => callback(config.token),
@@ -916,7 +954,10 @@ private fun spotifyWebPlaybackHtml(config: SpotifyWebPlaybackConfig): String {
                 setStatus("设备离线：" + device_id, "离线");
               });
 
-              player.addListener("initialization_error", ({ message }) => setStatus(message, "初始化失败"));
+              player.addListener("initialization_error", ({ message }) => {
+                setReady(false);
+                setStatus(webPlaybackUnsupportedMessage(message), "初始化失败");
+              });
               player.addListener("authentication_error", ({ message }) => setStatus(message, "鉴权失败"));
               player.addListener("account_error", ({ message }) => setStatus(message, "账号限制"));
               player.addListener("playback_error", ({ message }) => setStatus(message, "播放失败"));
