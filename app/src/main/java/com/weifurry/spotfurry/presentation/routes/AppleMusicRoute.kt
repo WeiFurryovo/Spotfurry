@@ -3,25 +3,31 @@ package com.weifurry.spotfurry.presentation.routes
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.EdgeButton
 import androidx.wear.compose.material3.EdgeButtonSize
+import androidx.wear.compose.material3.ListHeader
+import androidx.wear.compose.material3.ListHeaderDefaults
 import androidx.wear.compose.material3.ScreenScaffold
+import androidx.wear.compose.material3.SurfaceTransformation as surfaceTransformation
 import androidx.wear.compose.material3.Text
+import androidx.wear.compose.material3.lazy.rememberTransformationSpec
+import androidx.wear.compose.material3.lazy.transformedHeight
 import com.weifurry.spotfurry.data.applemusic.AppleMusicConfig
 import com.weifurry.spotfurry.data.applemusic.AppleMusicKitAvailability
 import com.weifurry.spotfurry.data.applemusic.AppleMusicKitBridge
 import com.weifurry.spotfurry.data.applemusic.AppleMusicTokenStore
 import com.weifurry.spotfurry.presentation.components.ActionRowButton
-import com.weifurry.spotfurry.presentation.components.ListSectionHeader
 import com.weifurry.spotfurry.presentation.components.TrackCard
 
 @Composable
@@ -80,6 +86,7 @@ internal fun AppleMusicRoute(
     }
 
     val listState = rememberTransformingLazyColumnState()
+    val transformationSpec = rememberTransformationSpec()
 
     ScreenScaffold(
         scrollState = listState,
@@ -97,13 +104,25 @@ internal fun AppleMusicRoute(
             contentPadding = contentPadding
         ) {
             item(key = "apple-music-header") {
-                ListSectionHeader("Apple Music")
+                ListHeader(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .transformedHeight(this, transformationSpec)
+                            .minimumVerticalContentPadding(
+                                ListHeaderDefaults.minimumTopListContentPadding
+                            ),
+                    transformation = surfaceTransformation(transformationSpec)
+                ) {
+                    Text("Apple Music")
+                }
             }
             item(key = "apple-music-status") {
                 TrackCard(
                     title = "实验播放模式",
                     body = statusBody(config, availability, hasMusicUserToken, statusMessage),
-                    onClick = {}
+                    onClick = {},
+                    transformationSpec = transformationSpec
                 )
             }
             item(key = "check-sdk") {
@@ -113,7 +132,8 @@ internal fun AppleMusicRoute(
                     onClick = {
                         refreshAvailability()
                         statusMessage = availability.label
-                    }
+                    },
+                    transformationSpec = transformationSpec
                 )
             }
             item(key = "pairing-login") {
@@ -125,7 +145,8 @@ internal fun AppleMusicRoute(
                         } else {
                             "先配置 spotfurry.appleMusicAuthBaseUrl"
                         },
-                    onClick = onOpenPairingLogin
+                    onClick = onOpenPairingLogin,
+                    transformationSpec = transformationSpec
                 )
             }
             item(key = "apple-login") {
@@ -147,7 +168,8 @@ internal fun AppleMusicRoute(
                                 }
                             )
                         refreshAvailability()
-                    }
+                    },
+                    transformationSpec = transformationSpec
                 )
             }
             item(key = "play-test-song") {
@@ -170,7 +192,8 @@ internal fun AppleMusicRoute(
                                 ),
                             successMessage = "已请求 Apple Music 播放测试歌曲。"
                         )
-                    }
+                    },
+                    transformationSpec = transformationSpec
                 )
             }
             item(key = "resume") {
@@ -182,7 +205,8 @@ internal fun AppleMusicRoute(
                             result = bridge.resume(),
                             successMessage = "已请求 Apple Music 继续播放。"
                         )
-                    }
+                    },
+                    transformationSpec = transformationSpec
                 )
             }
             item(key = "pause") {
@@ -194,7 +218,8 @@ internal fun AppleMusicRoute(
                             result = bridge.pause(),
                             successMessage = "已请求 Apple Music 暂停播放。"
                         )
-                    }
+                    },
+                    transformationSpec = transformationSpec
                 )
             }
             item(key = "next") {
@@ -206,7 +231,8 @@ internal fun AppleMusicRoute(
                             result = bridge.skipNext(),
                             successMessage = "已请求 Apple Music 下一首。"
                         )
-                    }
+                    },
+                    transformationSpec = transformationSpec
                 )
             }
             item(key = "previous") {
@@ -218,7 +244,8 @@ internal fun AppleMusicRoute(
                             result = bridge.skipPrevious(),
                             successMessage = "已请求 Apple Music 上一首。"
                         )
-                    }
+                    },
+                    transformationSpec = transformationSpec
                 )
             }
             item(key = "clear-login") {
@@ -230,7 +257,8 @@ internal fun AppleMusicRoute(
                         bridge.release()
                         hasMusicUserToken = false
                         statusMessage = "已清除 Apple Music 登录状态。"
-                    }
+                    },
+                    transformationSpec = transformationSpec
                 )
             }
         }
