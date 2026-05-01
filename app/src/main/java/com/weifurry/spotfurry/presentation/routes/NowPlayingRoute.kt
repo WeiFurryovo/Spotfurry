@@ -1,20 +1,14 @@
 package com.weifurry.spotfurry.presentation.routes
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.EdgeButton
 import androidx.wear.compose.material3.EdgeButtonSize
-import androidx.wear.compose.material3.ListHeader
-import androidx.wear.compose.material3.ListHeaderDefaults
 import androidx.wear.compose.material3.ScreenScaffold
-import androidx.wear.compose.material3.SurfaceTransformation as surfaceTransformation
 import androidx.wear.compose.material3.Text
-import androidx.wear.compose.material3.lazy.rememberTransformationSpec
-import androidx.wear.compose.material3.lazy.transformedHeight
 import com.weifurry.spotfurry.presentation.components.ActionRowButton
+import com.weifurry.spotfurry.presentation.components.ListSectionHeader
 import com.weifurry.spotfurry.presentation.components.TrackCard
 import com.weifurry.spotfurry.presentation.player.SpotfurryState
 
@@ -31,7 +25,6 @@ internal fun NowPlayingRoute(
     onOpenLibrary: () -> Unit
 ) {
     val listState = rememberTransformingLazyColumnState()
-    val transformationSpec = rememberTransformationSpec()
 
     ScreenScaffold(
         scrollState = listState,
@@ -48,98 +41,77 @@ internal fun NowPlayingRoute(
             state = listState,
             contentPadding = contentPadding
         ) {
-            item {
-                ListHeader(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .transformedHeight(this, transformationSpec)
-                            .minimumVerticalContentPadding(
-                                ListHeaderDefaults.minimumTopListContentPadding
-                            ),
-                    transformation = surfaceTransformation(transformationSpec)
-                ) {
-                    Text("当前播放")
-                }
+            item(key = "now-playing-header") {
+                ListSectionHeader("当前播放")
             }
-            item {
+            item(key = "now-playing-track") {
                 TrackCard(
                     title = state.currentTrack.title,
                     body = "${state.currentTrack.artist}\n${state.playbackSummary}",
-                    onClick = {},
-                    transformationSpec = transformationSpec
+                    onClick = {}
                 )
             }
-            item {
+            item(key = "next") {
                 ActionRowButton(
                     label = "下一首",
                     detail = state.nextTrackLabel,
-                    onClick = onSkipNext,
-                    transformationSpec = transformationSpec
+                    onClick = onSkipNext
                 )
             }
-            item {
+            item(key = "previous") {
                 ActionRowButton(
                     label = "上一首",
                     detail = "重新播放当前歌曲或返回上一首",
-                    onClick = onSkipPrevious,
-                    transformationSpec = transformationSpec
+                    onClick = onSkipPrevious
                 )
             }
-            item {
+            item(key = "like") {
                 ActionRowButton(
                     label = if (state.isLiked) "已喜欢" else "喜欢歌曲",
                     detail = "把这首歌加入手表收藏",
-                    onClick = state::toggleLike,
-                    transformationSpec = transformationSpec
+                    onClick = state::toggleLike
                 )
             }
-            item {
+            item(key = "shuffle") {
                 ActionRowButton(
                     label = if (state.shuffleEnabled) "随机已开" else "随机已关",
                     detail = "模式：${state.repeatMode.label}",
-                    onClick = onToggleShuffle,
-                    transformationSpec = transformationSpec
+                    onClick = onToggleShuffle
                 )
             }
-            item {
+            item(key = "repeat") {
                 ActionRowButton(
                     label = "重复播放",
                     detail = "当前模式：${state.repeatMode.label}",
-                    onClick = onCycleRepeat,
-                    transformationSpec = transformationSpec
+                    onClick = onCycleRepeat
                 )
             }
-            item {
+            item(key = "volume-up") {
                 ActionRowButton(
                     label = "音量 +5",
                     detail = "当前音量 ${state.volumePercent}%",
-                    onClick = { onVolumeChange(5) },
-                    transformationSpec = transformationSpec
+                    onClick = { onVolumeChange(5) }
                 )
             }
-            item {
+            item(key = "volume-down") {
                 ActionRowButton(
                     label = "音量 -5",
                     detail = "当前音量 ${state.volumePercent}%",
-                    onClick = { onVolumeChange(-5) },
-                    transformationSpec = transformationSpec
+                    onClick = { onVolumeChange(-5) }
                 )
             }
-            item {
+            item(key = "open-queue") {
                 ActionRowButton(
                     label = "打开队列",
                     detail = "队列中共有 ${state.queue.size} 首歌",
-                    onClick = onOpenQueue,
-                    transformationSpec = transformationSpec
+                    onClick = onOpenQueue
                 )
             }
-            item {
+            item(key = "open-library") {
                 ActionRowButton(
                     label = "浏览音乐库",
                     detail = "切换到新的播放列表",
-                    onClick = onOpenLibrary,
-                    transformationSpec = transformationSpec
+                    onClick = onOpenLibrary
                 )
             }
         }

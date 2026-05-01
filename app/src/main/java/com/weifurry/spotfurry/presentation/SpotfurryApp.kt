@@ -48,6 +48,7 @@ internal fun SpotfurryApp() {
     val spotifyTokenStore = remember(context) { SpotifyTokenStore(context) }
     val spotifyPlaybackClient = remember { SpotifyPlaybackClient() }
     val coroutineScope = rememberCoroutineScope()
+    val currentScreen = backStack.lastOrNull()
 
     fun navigateTo(screen: SpotfurryScreen) {
         if (backStack.lastOrNull() != screen) {
@@ -206,8 +207,9 @@ internal fun SpotfurryApp() {
         )
     }
 
-    LaunchedEffect(appState.isPlaying, appState.currentTrack.id) {
-        while (appState.isPlaying) {
+    val shouldAdvancePreview = currentScreen == HomeScreen && !appState.isSpotifyPlayback
+    LaunchedEffect(appState.isPlaying, appState.currentTrack.id, shouldAdvancePreview) {
+        while (appState.isPlaying && shouldAdvancePreview) {
             delay(1_000)
             appState.advancePreviewBySeconds(1)
         }
